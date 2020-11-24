@@ -1,0 +1,23 @@
+{
+  "name": "apostrophe-images-connector",
+  "version": "1.0.0",
+  "description": "A set of modules that ease importing of web-compatible image content from various media sources, including DAMs and Unsplash, into Apostrophe's media library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apostrophecms/apostrophe-images-connector.git"
+  },
+  "keywords": [
+    "Apostrophe",
+    "images"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/apostrophecms/apostrophe-images-connector/issues"
+  },
+  "homepage": "https://github.com/apostrophecms/apostrophe-images-connector#readme"
+}

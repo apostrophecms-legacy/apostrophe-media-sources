@@ -19,6 +19,19 @@ apos.define('apostrophe-images-manager-modal', {
       $mediaSources.append($select);
 
       superAfterRefresh(callback);
+
+      self.$el.on('change', 'select[name="media-sources"]', function(evt) {
+        apos.create('media-source-browser', { action: self.action, name: $(this)[0].value });
+      });
     };
+  }
+});
+
+apos.define('media-source-browser', {
+  extend: 'apostrophe-modal',
+  source: 'media-source-browser',
+  construct: function(self, options) {
+    console.log('self ====> ', self)
+    console.log('options ====> ', options)
   }
 });

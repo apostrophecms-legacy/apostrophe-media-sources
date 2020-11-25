@@ -7,11 +7,15 @@ apos.define('apostrophe-images-manager-modal', {
     self.afterRefresh = function (callback) {
       const $mediaSources = self.$el.find('[data-media-sources]');
 
-      // const selectOptions = options.filters.reduce((acc, cur) => {
+      const connectors = JSON.parse(apos.connectors)
+      const $connectors = connectors.reduce((acc, connector) => {
+        return `${acc}<option>${connector}</option>`
+      }, '')
 
-      // }, '')
+      const selectClasses = 'class="apos-field-input apos-field-input-select"'
 
-      const $select = `<select name="media-sources" class="apos-field-input apos-field-input-select"><option>Apostrophe</option></select>`;
+      const $select = `<select name="media-sources" ${selectClasses}><option>Apostrophe</option>${$connectors}</select>`;
+
       $mediaSources.append($select);
 
       superAfterRefresh(callback);

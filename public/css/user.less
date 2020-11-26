@@ -1,70 +1,80 @@
 
-.apos-ui.apos-modal .apos-modal-header {
-  .apos-modal-filters {
-    .apos-modal-media-sources-toggles {
-      margin: 1rem 0;
+.apos-ui.apos-modal {
+  .apos-modal-header {
+    .apos-modal-filters {
+      .apos-modal-media-sources-toggles {
+        margin: 1rem 0;
+
+        .apos-modal-filter {
+          label {
+            display: block;
+            margin-bottom: .8rem;
+          }
+
+          select {
+            margin-left: 0;
+          }
+        }
+      }
+    }
+
+    .apos-modal-filters[data-apos-modal-current='media-source-browser'] {
+      .apos-modal-filters-toggles {
+        align-items: end;
+      }
 
       .apos-modal-filter {
+        display: flex;
+        flex-direction: column;
+        max-width: 10rem;
+
         label {
-          display: block;
-          margin-bottom: .8rem;
+          margin-bottom: 5px;
         }
 
         select {
+          min-width: 4.688rem;
+        }
+
+        .apos-field-group {
+          display: flex;
+          flex-direction: row;
+
+          input[type=number] {
+            appearance: textfield;
+            // -moz-appearance: textfield;
+          }
+
+          .apos-field-input-select {
+            margin-left: 10px;
+          }
+        }
+
+        .apos-field-input-text {
+          padding: .5rem;
+          width: 50%;
+        }
+
+        .apos-field-input-select {
           margin-left: 0;
         }
       }
     }
   }
 
-  .apos-modal-filters[data-apos-modal-current='media-source-browser'] {
-    .apos-modal-filters-toggles {
-      align-items: end;
+  &[data-apos-modal-current='media-source-browser'] {
+    .apos-modal-header {
+      height: 160px;
     }
 
-    .apos-modal-filter {
-      display: flex;
-      flex-direction: column;
-      max-width: 10rem;
-
-      label {
-        margin-bottom: 5px;
-      }
-
-      select {
-        min-width: 4.688rem;
-      }
-
-      .apos-field-group {
-        display: flex;
-        flex-direction: row;
-
-        input[type=number] {
-          appearance: textfield;
-          // -moz-appearance: textfield;
-        }
-
-        .apos-field-input-select {
-          margin-left: 10px;
-        }
-      }
-
-      .apos-field-input-text {
-        padding: .5rem;
-        width: 50%;
-      }
-
-      .apos-field-input-select {
-        margin-left: 0;
-      }
-    }
-
-    .apos-manage-view {
-      height: 100%;
+    .apos-modal-body {
+      // height: 100%;
 
       .apos-manage-grid-view {
-        height: 100%;
+        overflow: visible;
+        // height: 100%;
       }
     }
+
   }
 }

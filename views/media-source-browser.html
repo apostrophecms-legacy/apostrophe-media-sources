@@ -115,12 +115,17 @@
 {# Populated by Jquery when searching for images #}
 {% block body %}
 <div class="apos-manage-view">
-<div class="apos-manage-grid-view">
-  <div class="apos-manage-showing">
-    <div class='apos-manage-result-label' data-result-label></div>
+  <div class="apos-manage-grid-view">
+    <div class="apos-manage-showing">
+      <div class='apos-manage-result-label' data-result-label></div>
+    </div>
+    <div class="apos-manage-grid-page" data-items></div>
   </div>
-  <div class="apos-manage-grid-page" data-items></div>
 </div>
+{% endblock %}
 
-</div>
+{% block footer %}
+  <div class="apos-modal-footer-inner">
+    My pager !!
+  </div>
 {% endblock %}

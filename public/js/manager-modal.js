@@ -37,6 +37,18 @@ apos.define('media-source-browser', {
   extend: 'apostrophe-modal',
   source: 'media-source-browser',
   construct: function (self, options) {
+    // const superAfterShow = self.afterShow;
+    // self.afterShow = function (cb) {
+
+    //   const headerHeight = self.$el.find('.apos-modal-header').outerHeight();
+
+    //   console.log('headerHeight ===> ', headerHeight);
+
+    //   self.resizeContentHeight();
+
+    //   return superAfterShow(cb);
+    // };
+
     const superBeforeShow = self.beforeShow;
     self.beforeShow = function(callback) {
       const $form = self.$el.find('[data-media-sources-form]');
@@ -45,7 +57,6 @@ apos.define('media-source-browser', {
 
       $form.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
-
           const formData = self.getFormData();
 
           $.post(action, formData, function(data) {

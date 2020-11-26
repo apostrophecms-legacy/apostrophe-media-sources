@@ -19,5 +19,9 @@
   "bugs": {
     "url": "https://github.com/apostrophecms/apostrophe-images-connector/issues"
   },
-  "homepage": "https://github.com/apostrophecms/apostrophe-images-connector#readme"
+  "homepage": "https://github.com/apostrophecms/apostrophe-images-connector#readme",
+  "devDependencies": {
+    "eslint": "^7.14.0",
+    "eslint-config-apostrophe": "^3.4.1"
+  }
 }

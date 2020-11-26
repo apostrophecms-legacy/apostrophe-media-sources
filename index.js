@@ -43,8 +43,7 @@ module.exports = {
 
       return self.renderAndSend(req, 'media-source-browser', {
         label: provider,
-        options: connectorModule.options.mediaSourceConnector,
-        action: connectorModule.action
+        options: connectorModule.options.mediaSourceConnector
       });
     });
   }

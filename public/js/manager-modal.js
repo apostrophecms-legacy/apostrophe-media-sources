@@ -7,12 +7,12 @@ apos.define('apostrophe-images-manager-modal', {
     self.afterRefresh = function (callback) {
       const $mediaSources = self.$el.find('[data-media-sources]');
 
-      const connectors = JSON.parse(apos.connectors)
+      const connectors = JSON.parse(apos.connectors);
       const $connectors = connectors.reduce((acc, connector) => {
-        return `${acc}<option>${connector}</option>`
-      }, '')
+        return `${acc}<option>${connector}</option>`;
+      }, '');
 
-      const selectClasses = 'class="apos-field-input apos-field-input-select"'
+      const selectClasses = 'class="apos-field-input apos-field-input-select"';
 
       const $select = `<select name="media-sources" ${selectClasses}><option>Apostrophe</option>${$connectors}</select>`;
 
@@ -20,8 +20,14 @@ apos.define('apostrophe-images-manager-modal', {
 
       superAfterRefresh(callback);
 
-      self.$el.on('change', 'select[name="media-sources"]', function(evt) {
-        apos.create('media-source-browser', { action: self.action, name: $(this)[0].value });
+      self.$el.on('change', 'select[name="media-sources"]', function() {
+        const { value } = $(this)[0];
+        if (value !== 'Apostrophe') {
+          apos.create('media-source-browser', {
+            action: self.action,
+            body: { provider: value }
+          });
+        }
       });
     };
   }
@@ -30,8 +36,48 @@ apos.define('apostrophe-images-manager-modal', {
 apos.define('media-source-browser', {
   extend: 'apostrophe-modal',
   source: 'media-source-browser',
-  construct: function(self, options) {
-    console.log('self ====> ', self)
-    console.log('options ====> ', options)
+  construct: function (self, options) {
+
+    const superBeforeShow = self.beforeShow;
+    self.beforeShow = function(callback) {
+      const $form = self.$el.find('[data-media-sources-form]');
+
+      $form.keypress(({ originalEvent }) => {
+        if (originalEvent.charCode === 13) {
+
+          const data = self.getFormData();
+
+          console.log('data ===> ', data);
+        }
+      });
+
+      return superBeforeShow(callback);
+    };
+
+    self.getFormData = () => {
+      const $form = self.$el.find('[data-media-sources-form]');
+
+      const widthValue = $form.find('[data-media-sources-width-value]').val();
+      const widthRange = $form.find('[data-media-sources-width-range]').val();
+      const heightValue = $form.find('[data-media-sources-height-value]').val();
+      const heightRange = $form.find('[data-media-sources-height-range]').val();
+      const orientation = $form.find('[data-media-sources-orientation]').val();
+      const extension = $form.find('[data-media-sources-extension]').val();
+      const search = $form.find('[data-media-sources-search]').val();
+
+      return {
+        ...widthValue && {
+          widthValue,
+          widthRange
+        },
+        ...heightValue && {
+          heightValue,
+          heightRange
+        },
+        ...orientation && orientation !== 'All' && { orientation },
+        ...extension && extension !== 'All' && { extension },
+        ...search && { search }
+      };
+    };
   }
 });

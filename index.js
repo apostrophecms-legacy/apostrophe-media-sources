@@ -11,32 +11,40 @@ module.exports = {
       {
         name: 'width',
         type: 'string',
-        label: 'Width',
+        label: 'Width'
       }
     ].concat(options.addFields || []);
   },
   construct: function(self, options) {
-    self.on('apostrophe:modulesReady', 'getAllImagesConnectorsModules' , () => {
+
+    self.on('apostrophe:modulesReady', 'getAllImagesConnectorsModules', () => {
       // Find all images connectors defined in app configuration
-      const connectors = Object.entries(self.apos.modules)
-        .reduce((connectors, [moduleName, moduleConfig]) => {
-          return !moduleConfig.mediaSourceConnector
+      const connectors = Object.values(self.apos.modules)
+        .reduce((connectors, moduleConfig) => {
+          return !moduleConfig.options.mediaSourceConnector
             ? connectors
             : [
               ...connectors,
               moduleConfig.options.label
-            ]
-      }, [])
+            ];
+        }, []);
 
       self.on('apostrophe-pages:beforeSend', 'sendConnectorsToBrowser', async (req) => {
         req.browserCall('apos.connectors=?', JSON.stringify(connectors));
-      })
-    })
+      });
+    });
 
     self.route('post', 'media-source-browser', function(req, res) {
+      const { provider } = req.body;
+
+      const connectorModule = self.apos.modules[
+        `apostrophe-images-connector-${provider.toLowerCase()}`
+      ];
+
       return self.renderAndSend(req, 'media-source-browser', {
-        options: self.options,
-        label: 'Media Source Browser'
+        label: provider,
+        options: connectorModule.options.mediaSourceConnector,
+        action: connectorModule.action
       });
     });
   }

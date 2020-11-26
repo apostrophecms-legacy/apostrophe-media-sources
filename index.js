@@ -37,12 +37,10 @@ module.exports = {
     self.route('post', 'media-source-browser', function(req, res) {
       const { provider } = req.body;
 
-      const connectorModule = self.apos.modules[
-        `apostrophe-images-connector-${provider.toLowerCase()}`
-      ];
+      const connectorModule = self.apos.modules[`apostrophe-images-connector-${provider.toLowerCase()}`];
 
       return self.renderAndSend(req, 'media-source-browser', {
-        label: provider,
+        label: `Browse ${provider} Images`,
         options: connectorModule.options.mediaSourceConnector,
         action: connectorModule.action
       });

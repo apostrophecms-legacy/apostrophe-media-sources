@@ -21,12 +21,14 @@ apos.define('apostrophe-images-manager-modal', {
       superAfterRefresh(callback);
 
       self.$el.on('change', 'select[name="media-sources"]', function() {
-        const { value } = $(this)[0];
+        const { value } = this;
         if (value !== 'Apostrophe') {
           apos.create('media-source-browser', {
             action: self.action,
             body: { provider: value }
           });
+          // Select "Apostrophe" in the dropdown: when coming back, the user can select again what he has just selected
+          setTimeout(() => (this.selectedIndex = 0), 250);
         }
       });
     };
@@ -37,18 +39,18 @@ apos.define('media-source-browser', {
   extend: 'apostrophe-modal',
   source: 'media-source-browser',
   construct: function (self, options) {
-
     const superBeforeShow = self.beforeShow;
     self.beforeShow = function(callback) {
       const $form = self.$el.find('[data-media-sources-form]');
 
       $form.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
-
           const data = self.getFormData();
-
-          console.log('data ===> ', data);
         }
+      });
+
+      self.link('import', function(e) {
+        // Here do import
       });
 
       return superBeforeShow(callback);

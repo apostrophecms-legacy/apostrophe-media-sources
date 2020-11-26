@@ -1,7 +1,15 @@
 {% extends "apostrophe-modal:base.html" %}
+{% import 'apostrophe-ui:components/buttons.html' as buttons %}
 {% import 'apostrophe-ui:components/fields.html' as fields with context %}
 
 {% block label %}{{ data.label }}{% endblock %}
+
+{% block controls %}
+  <div class="apos-modal-controls">
+    {{ buttons.minor('Finished', { action: 'cancel' }) }}
+    {{ buttons.major('Import', { action: 'import', attributes: 'data-import' }) }}
+  </div>
+{% endblock %}
 
 {% block filters %}
   <div class="apos-clearfix apos-modal-filters-inner" data-filters>

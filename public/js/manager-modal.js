@@ -50,24 +50,33 @@ apos.define('media-source-browser', {
       done();
     };
 
-    self.requestMediaSource = ($form, page) => {
-      const formData = {
-        ...self.getFormData($form),
-        page
-      };
+    self.requestMediaSource = async ($form, page) => {
+      try {
+        const formData = {
+          ...self.getFormData($form),
+          page
+        };
 
-      const { action } = $form.data();
+        const { action } = $form.data();
 
-      $.post(action, formData, (data) => {
+        const {
+          results,
+          total,
+          totalPages
+        } = await apos.utils.post(action, formData);
 
-        self.injectResultsLabel(data.results.length, data.total, page);
-        self.injectResultsList(data.results);
+        self.injectResultsLabel(results.length, total, page);
+        self.injectResultsList(results);
         self.injectResultsPager({
           $form,
-          currentPage: page,
-          totalPages: data.totalPages
+          current: page,
+          total: totalPages,
+          noResults: !results.length
         });
-      });
+      } catch (err) {
+        // TODO Show error to user
+        console.log('err ===> ', err);
+      }
     };
 
     self.getFormData = ($form) => {
@@ -97,6 +106,13 @@ apos.define('media-source-browser', {
     self.injectResultsLabel = (numResults, total, page) => {
       const $resultsLabel = self.$el.find('[data-result-label]');
 
+      if (!numResults) {
+        $resultsLabel.empty();
+        $resultsLabel.append('No Results');
+
+        return;
+      }
+
       const end = page * numResults;
       const start = end - (numResults - 1);
 
@@ -123,7 +139,12 @@ apos.define('media-source-browser', {
       <div class="apos-manage-grid-piece">
       <div class="apos-manage-grid-image">
         <img src="${item.urls.thumb}" alt="image from Unsplash" />
+        <div class="apos-image-screen" />
         <div class="apos-manage-grid-piece-controls">
+          <button class="apos-button apos-button--minor">
+            Infos
+          <i class="fa fa-caret-right" />
+          </button>
         </div>
       </div>
       <div class="apos-manage-grid-piece-label">${item.description ? item.description : ''}</div>
@@ -131,7 +152,6 @@ apos.define('media-source-browser', {
         <input type="checkbox" class="apos-field-input apos-field-input-checkbox" />
         <span class="apos-field-input-checkbox-indicator"></span>
       </label>
-
     </div>`;
 
       //   <div class="apos-manage-grid-piece" data-focus-{{ piece.type }} data-edit-dbl-{{ data.options.name | css }}="{{ piece._id }}" data-piece="{{ piece._id }}">
@@ -152,11 +172,15 @@ apos.define('media-source-browser', {
     };
 
     self.injectResultsPager = ({
-      $form, currentPage, totalPages
+      $form, current, total, noResults
     }) => {
       const $pager = self.$el.find('[data-media-sources-pager]');
 
-      const htmlPager = self.getHtmlPager(currentPage, totalPages);
+      const htmlPager = self.getHtmlPager({
+        current,
+        total,
+        noResults
+      });
 
       $pager.empty();
       $pager.append(htmlPager);
@@ -173,7 +197,26 @@ apos.define('media-source-browser', {
       });
     };
 
-    self.getHtmlPager = (current, total) => {
+    self.getHtmlPagerItem = ({
+      num,
+      isLast,
+      isActive,
+      isFirst
+    }) => {
+      return `<span class="apos-pager-number${
+        isFirst ? ' apos-first' : ''}${
+        isLast ? ' apos-last' : ''}${
+        isActive ? ' apos-active' : ''}">${
+        !isActive ? `<a data-apos-page=${num}>${num}</a>` : num}</span>`;
+    };
+
+    self.getHtmlPager = ({
+      current, total, noResults
+    }) => {
+      if (noResults) {
+        return self.getHtmlPagerItem({ num: 1 });
+      }
+
       const maxPages = 6;
       const pagerSize = (total < maxPages ? total : maxPages);
 
@@ -181,91 +224,71 @@ apos.define('media-source-browser', {
       const pagerIterator = [ ...Array(pagerSize + 2).keys() ];
 
       const pagerToInject = pagerIterator.reduce((acc, index) => {
-        const pageNumber = index + 1;
+        const pagerNumber = index + 1;
 
         const gapItem = '<span class="apos-pager-gap">...</span>';
 
-        const getHtmlItem = ({
-          num,
-          isLast,
-          isActive,
-          isFirst
-        }) => {
-          return `<span class="apos-pager-number
-            ${isFirst ? ' apos-first' : ''}
-            ${isLast ? ' apos-last' : ''}
-            ${isActive ? ' apos-active' : ''}
-            ">
-            ${!isActive ? `<a data-apos-page=${num}>${num}</a>` : num}
-          </span>`;
-        };
-
-        const numberToRender = () => {
-          switch (pageNumber) {
+        // Depending on where we are in the pages, render the right
+        // page number at the right place
+        const numberToRender = (lastPages = false) => {
+          switch (pagerNumber) {
             case 2:
-              return current - 2;
+              return lastPages ? total - 4 : current - 2;
             case 3:
-              return current - 1;
+              return lastPages ? total - 3 : current - 1;
             case 4:
-              return current;
+              return lastPages ? total - 2 : current;
             case 5:
-              return current + 1;
+              return lastPages ? total - 1 : current + 1;
             case 6:
-              return current + 2;
+              return lastPages ? total : current + 2;
           }
         };
 
-        if (current > 4) {
+        // If we are in intermediate page
+        if (current > 4 && current <= total - 4) {
           const num = numberToRender();
 
           if (num) {
-            return `${acc}${pageNumber === 2 ? gapItem : ''}${getHtmlItem({
+            return `${acc}${pagerNumber === 2 ? gapItem : ''}${self.getHtmlPagerItem({
+              num,
+              isActive: num === current
+            })}`;
+          }
+        }
+
+        // If the current page is one of the 4 last ones
+        if (current > total - 4) {
+          const num = numberToRender(true);
+
+          if (num) {
+            return `${acc}${pagerNumber === 2 ? gapItem : ''}${self.getHtmlPagerItem({
               num,
               isActive: num === current
             })}`;
           }
 
-          // if (pageNumber === 2) {
-          //   return `${acc}${gapItem}${getHtmlItem({ num: current - 2 })}`;
-          // }
-          // if (pageNumber === 3) {
-          //   return `${acc}${getHtmlItem({ num: current - 1 })}`;
-          // }
-          // if (pageNumber === 4) {
-          //   return `${acc}${getHtmlItem({
-          //     num: current,
-          //     isActive: true
-          //   })}`;
-          // }
-          // if (pageNumber === 5) {
-          //   return `${acc}${getHtmlItem({ num: current + 1 })}`;
-          // }
-          // if (pageNumber === 6) {
-          //   return `${acc}${getHtmlItem({ num: current + 2 })}`;
-          // }
+          // We dont render the 2 last pagers
+          if (pagerNumber > 6) {
+            return acc;
+          }
+        } else {
+          // If we aren't in last pages, we want a gap and the last page
+          if (pagerNumber === pagerSize + 1) {
+            return `${acc}${gapItem}`;
+          }
+          if (pagerNumber === pagerSize + 2) {
+            return `${acc}${self.getHtmlPagerItem({
+              num: total,
+              isLast: true
+            })}`;
+          }
         }
 
-        if (pageNumber === pagerSize + 1) {
-          return `${acc}${gapItem}`;
-        }
-        if (pageNumber === pagerSize + 2) {
-          return `${acc}${getHtmlItem({
-            num: total,
-            isLast: true
-          })}`;
-        }
-
-        // const firstClass = pageNumber === 1 ? ' apos-first' : '';
-        // const activeClass = pageNumber === current ? ' apos-active' : '';
-
-        // const item = `<span class="apos-pager-number${firstClass}${activeClass}">
-        //   ${!activeClass ? `<a data-apos-page=${pageNumber}>${pageNumber}</a>` : pageNumber}
-        // </span>`;
-
-        const item = getHtmlItem({
-          num: pageNumber,
-          isActive: pageNumber === current,
-          isFirst: pageNumber === 1
+        const item = self.getHtmlPagerItem({
+          num: pagerNumber,
+          isActive: pagerNumber === current,
+          isFirst: pagerNumber === 1
         });
 
         return `${acc}${item}`;

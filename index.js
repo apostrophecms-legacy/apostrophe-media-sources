@@ -16,7 +16,6 @@ module.exports = {
     ].concat(options.addFields || []);
   },
   construct: function(self, options) {
-
     self.on('apostrophe:modulesReady', 'getAllImagesConnectorsModules', () => {
       // Find all images connectors defined in app configuration
       const connectors = Object.values(self.apos.modules)

@@ -31,10 +31,14 @@ module.exports = {
       const connectorModule = self.apos.modules[`apostrophe-images-connector-${provider.toLowerCase()}`];
 
       return self.renderAndSend(req, 'media-source-browser', {
-        label: `Browse ${provider} Images`,
+        provider,
         options: connectorModule.options.mediaSourceConnector,
         action: connectorModule.action
       });
+    });
+
+    self.route('post', 'find/:connector', function(req, res) {
+      self.apos.modules[req.params.connector].find(req, {});
     });
   }
 };

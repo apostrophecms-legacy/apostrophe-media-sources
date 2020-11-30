@@ -1,5 +1,6 @@
 {% extends "apostrophe-modal:base.html" %}
 {% import 'apostrophe-ui:components/fields.html' as fields with context %}
+{% import 'apostrophe-pager:macros.html' as pager with context %}
 
 {% block label %}{{ data.label }}{% endblock %}
 
@@ -126,6 +127,17 @@
 
 {% block footer %}
   <div class="apos-modal-footer-inner">
-    My pager !!
+    <div class="apos-ui">
+      <div class="apos-pager" data-media-sources-pager>
+        {# <span class="apos-pager-number apos-first apos-active">1</span>
+        <span class="apos-pager-number">2</span>
+        <span class="apos-pager-number">3</span>
+        <span class="apos-pager-number">4</span>
+        <span class="apos-pager-gap">...</span>
+        <span class="apos-pager-number apos-last">56</span> #}
+      </div>
+    </div>
+  {{ pager.render({ page: 55, total: 56 }, 'toto') }}
   </div>
 {% endblock %}
+

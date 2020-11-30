@@ -47,6 +47,32 @@ apos.define('media-source-browser', {
         }
       });
 
+      self.$el.on('change', 'select[data-media-sources-orientation]', function() {
+        self.requestMediaSource($form, 1);
+      });
+
+      self.$el.on('input', 'input[data-media-sources-search]', debounce(function() {
+        self.requestMediaSource($form, 1);
+      }, 500));
+
+      function debounce(func, wait, immediate) {
+        let timeout;
+        return function() {
+          const context = this;
+          const args = arguments;
+
+          const later = function() {
+            timeout = null;
+            !immediate && func.apply(context, args);
+          };
+
+          const callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          callNow && func.apply(context, args);
+        };
+      };
+
       done();
     };
 

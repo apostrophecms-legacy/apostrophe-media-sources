@@ -6,15 +6,6 @@ module.exports = {
       'apostrophe-images-connector-unsplash'
     ]
   },
-  beforeConstruct: function (self, options) {
-    options.addFields = [
-      {
-        name: 'width',
-        type: 'string',
-        label: 'Width'
-      }
-    ].concat(options.addFields || []);
-  },
   construct: function(self, options) {
 
     self.on('apostrophe:modulesReady', 'getAllImagesConnectorsModules', () => {

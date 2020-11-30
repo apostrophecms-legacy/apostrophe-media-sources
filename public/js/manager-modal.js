@@ -45,7 +45,7 @@ apos.define('media-source-browser', {
 
       $form.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
-          const data = self.getFormData();
+          self.getFormData();
         }
       });
 

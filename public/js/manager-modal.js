@@ -41,6 +41,8 @@ apos.define('media-source-browser', {
     self.beforeShow = (done) => {
       const $form = self.$el.find('[data-media-sources-form]');
 
+      self.requestMediaSource($form, 1);
+
       $form.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
           self.requestMediaSource($form, 1);

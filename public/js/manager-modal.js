@@ -220,13 +220,15 @@ apos.define('media-source-browser', {
       const maxPages = 6;
       const pagerSize = (total < maxPages ? total : maxPages);
 
-      // We add two for the gap and the last page
-      const pagerIterator = [ ...Array(pagerSize + 2).keys() ];
+      const hasGaps = total > 6;
+
+      // We add two for the gap and the last page if more than 4 pages
+      const pagerIterator = [ ...Array(pagerSize + (hasGaps ? 2 : 0)).keys() ];
 
       const pagerToInject = pagerIterator.reduce((acc, index) => {
         const pagerNumber = index + 1;
 
-        const gapItem = '<span class="apos-pager-gap">...</span>';
+        const gapItem = hasGaps ? '<span class="apos-pager-gap">...</span>' : '';
 
         // Depending on where we are in the pages, render the right
         // page number at the right place
@@ -245,43 +247,45 @@ apos.define('media-source-browser', {
           }
         };
 
-        // If we are in intermediate page
-        if (current > 4 && current <= total - 4) {
-          const num = numberToRender();
+        if (hasGaps) {
+          // If we are in intermediate page
+          if (current > 4 && current <= total - 4) {
+            const num = numberToRender();
 
-          if (num) {
-            return `${acc}${pagerNumber === 2 ? gapItem : ''}${self.getHtmlPagerItem({
+            if (num) {
+              return `${acc}${pagerNumber === 2 ? gapItem : ''}${self.getHtmlPagerItem({
               num,
               isActive: num === current
             })}`;
+            }
           }
-        }
 
-        // If the current page is one of the 4 last ones
-        if (current > total - 4) {
-          const num = numberToRender(true);
+          // If the current page is one of the 4 last ones
+          if (current > total - 4) {
+            const num = numberToRender(true);
 
-          if (num) {
-            return `${acc}${pagerNumber === 2 ? gapItem : ''}${self.getHtmlPagerItem({
+            if (num) {
+              return `${acc}${pagerNumber === 2 ? gapItem : ''}${self.getHtmlPagerItem({
               num,
               isActive: num === current
             })}`;
-          }
+            }
 
-          // We dont render the 2 last pagers
-          if (pagerNumber > 6) {
-            return acc;
-          }
-        } else {
+            // We dont render the 2 last pagers
+            if (pagerNumber > 6) {
+              return acc;
+            }
+          } else {
           // If we aren't in last pages, we want a gap and the last page
-          if (pagerNumber === pagerSize + 1) {
-            return `${acc}${gapItem}`;
-          }
-          if (pagerNumber === pagerSize + 2) {
-            return `${acc}${self.getHtmlPagerItem({
+            if (pagerNumber === pagerSize + 1) {
+              return `${acc}${gapItem}`;
+            }
+            if (pagerNumber === pagerSize + 2) {
+              return `${acc}${self.getHtmlPagerItem({
               num: total,
               isLast: true
             })}`;
+            }
           }
         }
 

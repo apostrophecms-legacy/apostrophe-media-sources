@@ -6,8 +6,8 @@ apos.define('apostrophe-images-manager-modal', {
 
     self.afterRefresh = function (callback) {
       const $mediaSources = self.$el.find('[data-media-sources]');
-
       const connectors = JSON.parse(apos.connectors);
+
       const $connectors = connectors.reduce((acc, connector) => {
         return `${acc}<option>${connector}</option>`;
       }, '');
@@ -22,6 +22,7 @@ apos.define('apostrophe-images-manager-modal', {
 
       self.$el.on('change', 'select[name="media-sources"]', function() {
         const { value } = $(this)[0];
+
         if (value !== 'Apostrophe') {
           apos.create('media-source-browser', {
             action: self.action,
@@ -37,24 +38,30 @@ apos.define('media-source-browser', {
   extend: 'apostrophe-modal',
   source: 'media-source-browser',
   construct: (self, options) => {
+    self.results = [];
+    self.choices = [];
+
     // const superBeforeShow = self.beforeShow;
-    self.beforeShow = (done) => {
-      const $form = self.$el.find('[data-media-sources-form]');
+    self.beforeShow = async (done) => {
+      self.filters = self.$el.find('[data-filters');
+      self.$manageView = self.$el.find('[data-apos-manage-view]');
+      self.$filters = self.$modalFilters.find('[data-filters]');
 
-      self.requestMediaSource($form, 1);
+      self.enableCheckboxEvents();
+      await self.requestMediaSource(1);
 
-      $form.keypress(({ originalEvent }) => {
+      self.$filters.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
-          self.requestMediaSource($form, 1);
+          self.requestMediaSource(1);
         }
       });
 
       self.$el.on('change', 'select[data-media-sources-orientation]', function() {
-        self.requestMediaSource($form, 1);
+        self.requestMediaSource(1);
       });
 
       self.$el.on('input', 'input[data-media-sources-search]', debounce(function() {
-        self.requestMediaSource($form, 1);
+        self.requestMediaSource(1);
       }, 500));
 
       function debounce(func, wait, immediate) {
@@ -78,14 +85,88 @@ apos.define('media-source-browser', {
       done();
     };
 
-    self.requestMediaSource = async ($form, page) => {
+    self.enableCheckboxEvents = function() {
+      self.$el.on('change', 'input[type="checkbox"][name="select-all"]', function () {
+        const checked = $(this).prop('checked');
+
+        const $pieces = self.$el.find('[data-piece]');
+
+        $pieces.each(function() {
+          const id = $(this).attr('data-media-source-id');
+
+          $(this).find('input[type="checkbox"]').prop('checked', checked);
+          self.addOrRemoveChoice(id, !checked);
+        });
+      });
+
+      self.$el.on('change', '[data-piece] input[type="checkbox"]', function(e) {
+        const $box = $(this);
+        const id = $box.closest('[data-piece]').attr('data-media-source-id');
+
+        self.addOrRemoveChoice(id, !$box.prop('checked'));
+      });
+
+      // Add ability to select multiple checkboxes (Using Left Shift)
+      let lastChecked;
+      // Clicks on checkbox directly are not possible because as visibility:hidden is set on it and clicks won't be detected.
+      self.$el.on('click', '.apos-field-input-checkbox-indicator', function (e) {
+        const box = $(this).siblings('.apos-field-input-checkbox')[0];
+        // const checked = $(box).prop('checked');
+
+        // Store a variable called lastchecked to point to the last checked checkbox. If it is undefined it's the first checkbox that's selected.
+        if (!lastChecked) {
+          lastChecked = box;
+          return;
+        }
+
+        // If shift key is pressed and the checkbox is not checked.
+        if (e.shiftKey) {
+          if (!box.checked) {
+            const $checkboxesInScope = $(box).closest('[data-items]').find('input') || [];
+            const startIndex = $checkboxesInScope.index(box);
+            const endIndex = $checkboxesInScope.index(lastChecked);
+
+            $checkboxesInScope.slice(
+              Math.min(startIndex, endIndex),
+              Math.max(startIndex, endIndex) + 1
+            ).each(function (i, el) {
+              $(el).prop('checked', true);
+              $(el).trigger('change');
+            });
+          } else {
+            const $pieces = self.$el.find('[data-piece]');
+            const currentId = $(box).attr('data-media-source-id');
+            $pieces.each(function() {
+              const id = $(this).attr('data-media-source-id');
+
+              if (id !== currentId) {
+                $(this).find('input[type="checkbox"]').prop('checked', false);
+                self.addOrRemoveChoice(id, true);
+              }
+            });
+          }
+        }
+        lastChecked = box;
+      });
+    };
+
+    self.addOrRemoveChoice = (id, remove = false) => {
+      if (remove) {
+        self.choices = self.choices.filter((choiceId) => choiceId !== id);
+        return;
+      }
+
+      self.choices.push(id);
+    };
+
+    self.requestMediaSource = async (page) => {
       try {
         const formData = {
-          ...self.getFormData($form),
+          ...self.getFormData(self.$filters),
           page
         };
 
-        const { action } = $form.data();
+        const { action } = self.$filters.data();
 
         const {
           results,
@@ -96,25 +177,26 @@ apos.define('media-source-browser', {
         self.injectResultsLabel(results.length, total, page);
         self.injectResultsList(results);
         self.injectResultsPager({
-          $form,
           current: page,
           total: totalPages,
           noResults: !results.length
         });
+
+        self.results = results;
       } catch (err) {
         // TODO Show error to user
         console.log('err ===> ', err);
       }
     };
 
-    self.getFormData = ($form) => {
-      const widthValue = $form.find('[data-media-sources-width-value]').val();
-      const widthRange = $form.find('[data-media-sources-width-range]').val();
-      const heightValue = $form.find('[data-media-sources-height-value]').val();
-      const heightRange = $form.find('[data-media-sources-height-range]').val();
-      const orientation = $form.find('[data-media-sources-orientation]').val();
-      const extension = $form.find('[data-media-sources-extension]').val();
-      const search = $form.find('[data-media-sources-search]').val();
+    self.getFormData = () => {
+      const widthValue = self.$filters.find('[data-media-sources-width-value]').val();
+      const widthRange = self.$filters.find('[data-media-sources-width-range]').val();
+      const heightValue = self.$filters.find('[data-media-sources-height-value]').val();
+      const heightRange = self.$filters.find('[data-media-sources-height-range]').val();
+      const orientation = self.$filters.find('[data-media-sources-orientation]').val();
+      const extension = self.$filters.find('[data-media-sources-extension]').val();
+      const search = self.$filters.find('[data-media-sources-search]').val();
 
       return {
         ...widthValue && {
@@ -160,13 +242,34 @@ apos.define('media-source-browser', {
 
       $items.empty();
       $items.append(htmlToInject);
+
+      const items = $items.find('.apos-manage-grid-piece');
+
+      items.each((index, item) => {
+        const button = $(item).find('.apos-manage-grid-piece-controls button');
+
+        $(button).on('click', () => {
+          const itemId = $(item).data('media-source-id');
+          const data = self.results.find((item) => item.mediaSourceId === itemId);
+
+          apos.create('media-source-browser-editor', {
+            action: self.action,
+            transition: 'slide',
+            body: {
+              item: data,
+              provider: self.body.provider
+            }
+          });
+        });
+
+      });
     };
 
     self.getHtmlListItem = (item) => {
       return `
-      <div class="apos-manage-grid-piece">
+      <div class="apos-manage-grid-piece" data-piece data-media-source-id="${item.mediaSourceId}">
       <div class="apos-manage-grid-image">
-        <img src="${item.urls.thumb}" alt="image from Unsplash" />
+        <img src="${item.thumbLink}" alt="image from Unsplash" />
         <div class="apos-image-screen" />
         <div class="apos-manage-grid-piece-controls">
           <button class="apos-button apos-button--minor">
@@ -175,32 +278,16 @@ apos.define('media-source-browser', {
           </button>
         </div>
       </div>
-      <div class="apos-manage-grid-piece-label">${item.description ? item.description : ''}</div>
+      <div class="apos-manage-grid-piece-label">${item.title}</div>
       <label>
         <input type="checkbox" class="apos-field-input apos-field-input-checkbox" />
         <span class="apos-field-input-checkbox-indicator"></span>
       </label>
     </div>`;
-
-      //   <div class="apos-manage-grid-piece" data-focus-{{ piece.type }} data-edit-dbl-{{ data.options.name | css }}="{{ piece._id }}" data-piece="{{ piece._id }}">
-    //   <div class="apos-manage-grid-image">
-    //     {# Trash only has access to very low fi version of image, by design.
-    //       Other sizes will 404. Might not seem so due to your cache at first. -Tom #}
-    //     <img src="{{ apos.attachments.url(piece.attachment, { size: (piece.trash and 'one-sixth') or 'one-third' } ) }}" alt="">
-    //     <div class="apos-image-screen"></div>
-    //     <div class="apos-manage-grid-piece-controls">
-    //       {% set verb = 'rescue' if (piece.trash and not (data.canEditTrash)) else 'edit' %}
-    //       {% set label = 'Rescue' if (verb == rescue) else 'Edit' %}
-    //       {{ buttons.minor(label, { action: verb + '-' + data.options.name | css, value: piece._id, icon: 'caret-right' }) }}
-    //     </div>
-    //   </div>
-    //   <div class="apos-manage-grid-piece-label">{{ piece.title }}</div>
-    //   {{ fields.checkbox(data.options.name + '-select') }}
-    // </div>
     };
 
     self.injectResultsPager = ({
-      $form, current, total, noResults
+      current, total, noResults
     }) => {
       const $pager = self.$el.find('[data-media-sources-pager]');
 
@@ -219,7 +306,7 @@ apos.define('media-source-browser', {
         const page = $(item).data('apos-page');
 
         $(item).on('click', () => {
-          self.requestMediaSource($form, page);
+          self.requestMediaSource(page);
         });
 
       });
@@ -239,7 +326,9 @@ apos.define('media-source-browser', {
     };
 
     self.getHtmlPager = ({
-      current, total, noResults
+      current,
+      total,
+      noResults
     }) => {
       if (noResults) {
         return self.getHtmlPagerItem({ num: 1 });
@@ -248,7 +337,7 @@ apos.define('media-source-browser', {
       const maxPages = 6;
       const pagerSize = (total < maxPages ? total : maxPages);
 
-      const hasGaps = total > 6;
+      const hasGaps = total > maxPages;
 
       // We add two for the gap and the last page if more than 4 pages
       const pagerIterator = [ ...Array(pagerSize + (hasGaps ? 2 : 0)).keys() ];
@@ -328,5 +417,14 @@ apos.define('media-source-browser', {
 
       return pagerToInject;
     };
+  }
+});
+
+apos.define('media-source-browser-editor', {
+  extend: 'apostrophe-modal',
+  transition: 'slide',
+  source: 'media-source-browser-editor',
+  construct: (self, options) => {
+
   }
 });

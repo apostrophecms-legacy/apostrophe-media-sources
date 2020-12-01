@@ -76,12 +76,28 @@
     }
 
     .apos-modal-footer {
-      .apos-ui .apos-pager {
-        a {
-          cursor: pointer;
+      .apos-modal-footer-inner {
+        justify-content: flex-end;
+
+        .apos-ui .apos-pager {
+          a {
+            cursor: pointer;
+          }
         }
       }
     }
+  }
 
+  &[data-apos-modal-current='media-source-browser-editor'] {
+    .apos-field-attachment {
+      width: 65%;
+
+      .apos-attachment-existing {
+        .apos-attachment-info {
+          display: block;
+          margin: .3rem 0;
+        }
+      }
+    }
   }
 }

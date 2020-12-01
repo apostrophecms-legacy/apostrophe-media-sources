@@ -5,12 +5,11 @@
 {% block label %}{{ data.label }}{% endblock %}
 
 {% block filters %}
-  <div class="apos-clearfix apos-modal-filters-inner" data-filters>
-    <form
-      class="apos-modal-filters-toggles"
-      data-media-sources-form
-      data-action="{{data.options.action}}"
-    >
+  <div
+    class="apos-clearfix apos-modal-filters-inner"
+    data-filters
+    data-action="{{data.options.action}}">
+    <div class="apos-modal-filters-toggles">
       <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--left">
         <span class="apos-modal-filter">
           <label>Select</label>
@@ -109,7 +108,7 @@
         </div>
       </div>
       {% endif %}
-    </form>
+    </div>
   </div>
 {% endblock %}
 
@@ -137,7 +136,6 @@
         <span class="apos-pager-number apos-last">56</span> #}
       </div>
     </div>
-  {{ pager.render({ page: 55, total: 56 }, 'toto') }}
   </div>
 {% endblock %}
 

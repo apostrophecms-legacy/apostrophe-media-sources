@@ -6,15 +6,6 @@ module.exports = {
       'apostrophe-images-connector-unsplash'
     ]
   },
-  beforeConstruct: function (self, options) {
-    options.addFields = [
-      {
-        name: 'width',
-        type: 'string',
-        label: 'Width'
-      }
-    ].concat(options.addFields || []);
-  },
   construct: function(self, options) {
     self.on('apostrophe:modulesReady', 'getAllImagesConnectorsModules', () => {
       // Find all images connectors defined in app configuration
@@ -42,6 +33,20 @@ module.exports = {
 
       return self.renderAndSend(req, 'media-source-browser', {
         label: provider,
+        options: connectorModule.options.mediaSourceConnector
+      });
+    });
+
+    self.route('post', 'media-source-browser-editor', function(req, res) {
+      const { provider, item } = req.body;
+
+      const connectorModule = self.apos.modules[
+        `apostrophe-images-connector-${provider.toLowerCase()}`
+      ];
+
+      return self.renderAndSend(req, 'mediaSourceBrowserEditor', {
+        provider,
+        item,
         options: connectorModule.options.mediaSourceConnector
       });
     });

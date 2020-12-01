@@ -1,0 +1,164 @@
+{# {%- extends "apostrophe-modal:baseSlideable.html" -%} #}
+{# {% extends "apostrophe-modal:base.html" %} #}
+{% extends 'editorBase.html' %}
+
+{% set propertyLabels = data.options.propertyLabels %}
+{% set item = data.item %}
+
+{% for ingredient, amount in food %}
+  Utilisez {{ amount }} de {{ ingredient }}
+{% endfor %}
+
+{%- block modalClass -%}
+  apos-pieces-editor apos-ui-modal-no-sidebar apos-modal-slideable
+{%- endblock -%}
+
+{%- block controls -%}
+  {# {{ module.editControls() }} #}
+  <button class="apos-button apos-button--minor" type="button" data-apos-cancel="">
+    <span class="apos-button-label">Cancel</span>
+  </button>
+  <button class="apos-button apos-button--major" type="button" data-apos-save="">
+    <span class="apos-button-label">Import</span>
+  </button>
+{%- endblock -%}
+
+{%- block label -%}
+    {{ data.provider }} Details
+{%- endblock -%}
+
+{%- block body -%}
+  <form class="apos-form" data-apos-form>
+  {# {{ schemas.fields(data.schema) }} #}
+  	<div class="apostrophe-image-editor-fields">
+      {# <div class="apos-schema-tabs" data-schema-tabs></div> #}
+      <div class="apos-schema-groups">
+        <div class="apos-schema-group apos-active" data-apos-group="basics">
+          <div class="apos-schema-group-inner">
+
+          <fieldset class="apos-field apos-field-attachment apos-field-attachment apos-required" data-name="attachment">
+            <label class="apos-field-label">
+              Image File
+            </label>
+          <div class="apos-attachment-existing apos-extension-png" style="" data-existing="cki4aovjh002jixh9ldpx41pv">
+            <div class="apos-attachment-preview">
+              <img
+                data-preview=""
+                src="{{ item.thumbLink }}"
+                alt="">
+            </div>
+            <span class="apos-attachment-info" data-name="">
+            {% if item.title %}
+            {{ item.title }}
+            {% else %}
+            {{ __ns('apostrophe', "No Title") }}
+            {% endif %}
+            </span>
+            <span class="apos-attachment-info" data-name="">
+              {{ item.width }} X {{ item.height }}
+            </span>
+            <div class="apos-button-group">
+              <a
+                class="apos-button apos-button--action"
+                href="{{ item.previewLink }}"
+                data-link=""
+                target="_blank">
+                View file
+              </a>
+            </div>
+          </div>
+          </fieldset>
+
+            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="title">
+              <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+                {% if propertyLabels.title %}
+                  {{ propertyLabels.title }}
+                {% else %}
+                  {{ __ns('apostrophe', "Title") }}
+                {% endif %}
+              </label>
+              <input
+                name="title"
+                placeholder=""
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.title }}">
+            </fieldset>
+
+            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="description">
+                <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+                  {% if propertyLabels.description %}
+                    {{ propertyLabels.description }}
+                  {% else %}
+                    {{ __ns('apostrophe', "Description") }}
+                  {% endif %}
+                </label>
+                <input
+                  name="description"
+                  placeholder=""
+                  class="apos-field-input apos-field-input-text"
+                  type="text"
+                  value="{{ item.description }}">
+            </fieldset>
+
+            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="likes">
+                <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+                  {% if propertyLabels.likes %}
+                    {{ propertyLabels.likes }}
+                  {% else %}
+                    {{ __ns('apostrophe', "Likes") }}
+                  {% endif %}
+                </label>
+                <input
+                  name="likes"
+                  readonly
+                  class="apos-field-input apos-field-input-text"
+                  type="text"
+                  value="{{ item.likes }}">
+            </fieldset>
+
+            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="tags">
+              <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+                {% if propertyLabels.tags %}
+                  {{ propertyLabels.tags }}
+                {% else %}
+                  {{ __ns('apostrophe', "Tags") }}
+                {% endif %}
+              </label>
+              <input
+                name="title"
+                readonly
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.tags | join(", ") }}">
+            </fieldset>
+
+            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="categories">
+              <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+                {% if propertyLabels.categories %}
+                  {{ propertyLabels.categories }}
+                {% else %}
+                  {{ __ns('apostrophe', "Categories") }}
+                {% endif %}
+              </label>
+              <input
+                name="categories"
+                readonly
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.categories | join(", ") }}">
+            </fieldset>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+{%- endblock -%}
+
+{%- block instructions -%}
+  {{ __ns('apostrophe', 'Fill out the fields to edit an existing %s.', (data.options.label | d(''))) }}
+{%- endblock -%}²
+
+{% block footerContainer %}
+  fOOTER
+{% endblock %}

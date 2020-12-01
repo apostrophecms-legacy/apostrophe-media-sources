@@ -24,7 +24,7 @@ module.exports = {
         }, []);
 
       self.on('apostrophe-pages:beforeSend', 'sendConnectorsToBrowser', async (req) => {
-        req.browserCall('apos.connectors=?', JSON.stringify(connectors));
+        req.browserCall('apos.mediaSourceConnectors=?', JSON.stringify(connectors));
       });
     });
 
@@ -43,7 +43,8 @@ module.exports = {
     self.route('post', 'find/:connector', function(req, res) {
       if (self.apos.modules[req.params.connector] &&
         self.apos.modules[req.params.connector].find &&
-        typeof self.apos.modules[req.params.connector].find === 'function') {
+        typeof self.apos.modules[req.params.connector].find === 'function' &&
+        self.apos.modules[req.params.connector].options.mediaSourceConnector) {
         self.apos.modules[req.params.connector].find(req, {});
       }
     });

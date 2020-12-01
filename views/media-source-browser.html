@@ -16,102 +16,73 @@
     <form class="apos-modal-filters-toggles" data-media-sources-form>
       <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--left">
         <span class="apos-modal-filter">
-          <label>Select</label>
+          <label>{{ __ns('apostrophe', 'Select') }}</label>
           <div class="apos-modal-filter--padded">
             {{ fields.checkbox('select-all') }}
           </div>
         </span>
 
-        {% if 'width' in data.options.filters %}
-        <span class="apos-modal-filter">
-          <label>Width (px)</label>
-          <div class="apos-field-group">
-            <input
-              class="apos-field-input apos-field-input-text"
-              type="number"
-              min="0"
-              data-media-sources-width-value
-            />
-            <div class="apos-field-input-select-wrapper">
-              <select
-                class="apos-field-input apos-field-input-select"
-                data-media-sources-width-range
-              >
-                <option>Min</option>
-                <option>Max</option>
-              </select>
+        {% for filter in data.options.filters %}
+          {% if filter.type !== 'search' %}
+            <div class="apos-modal-filter">
+              <label>{{ __ns('apostrophe', filter.label) }}</label>
+              {% if filter.type === 'input' %}
+                <div class="apos-field-group">
+                  <input
+                    class="apos-field-input apos-field-input-text"
+                    type="number"
+                    min="0"
+                    data-media-sources-{{ filter.name }}-value
+                    data-media-sources-filter
+                    title="{{ filter.name }}"
+                  />
+                  {% if filter.range %}
+                    <div class="apos-field-input-select-wrapper">
+                      <select
+                        class="apos-field-input apos-field-input-select"
+                        data-media-sources-{{ filter.name }}-range
+                      >
+                        <option>{{ __ns('apostrophe', 'Min') }}</option>
+                        <option>{{ __ns('apostrophe', 'Max') }}</option>
+                      </select>
+                    </div>
+                  {% endif %}
+                </div>
+              {% elif filter.type === 'select' %}
+                <div class="apos-field-input-select-wrapper">
+                  <select
+                    class="apos-field-input apos-field-input-select"
+                    data-media-sources-{{ filter.name }}
+                    data-media-sources-filter
+                    title="{{ filter.name }}"
+                  >
+                    {% for choice in filter.choices %}
+                      <option value="{{ choice.value }}">{{ __ns('apostrophe', choice.label) }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% for filter in data.options.filters %}
+        {% if filter.type === 'search' %}
+          <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--right">
+            <div class="apos-modal-filters-{{ filter.name }}">
+              <input
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                placeholder="{{ __ns('apostrophe', filter.label) }}"
+                data-media-sources-{{ filter.name }}
+                data-media-sources-filter
+                title="{{ filter.name }}"
+              />
             </div>
           </div>
-        </span>
         {% endif %}
-        {% if 'height' in data.options.filters %}
-        <span class="apos-modal-filter">
-        <label>Height (px)</label>
-        <div class="apos-field-group">
-          <input
-            class="apos-field-input apos-field-input-text"
-            type="number"
-            min="0"
-            data-media-sources-height-value
-          />
-          <div class="apos-field-input-select-wrapper">
-            <select
-              class="apos-field-input apos-field-input-select"
-              data-media-sources-height-range
-            >
-              <option>Min</option>
-              <option>Max</option>
-            </select>
-          </div>
-        </div>
-        </span>
-        {% endif %}
-        {% if 'orientation' in data.options.filters %}
-        <span class="apos-modal-filter">
-          <label>Orientation</label>
-          <div class="apos-field-input-select-wrapper">
-            <select
-              class="apos-field-input apos-field-input-select"
-              data-media-sources-orientation
-            >
-              <option>All</option>
-              <option>Landscape</option>
-              <option>Portrait</option>
-              <option>Squarish</option>
-            </select>
-          </div>
-        </span>
-        {% endif %}
-        {% if 'extension' in data.options.filters %}
-        <span class="apos-modal-filter">
-          <label>File Type</label>
-          <div class="apos-field-input-select-wrapper">
-            <select
-              class="apos-field-input apos-field-input-select"
-              data-media-sources-extension
-            >
-              <option>All</option>
-              <option>Jpg</option>
-              <option>Png</option>
-              <option>Svg</option>
-              <option>Gif</option>
-            </select>
-          </div>
-        </span>
-        {% endif %}
-      </div>
-      {% if 'search' in data.options.filters %}
-      <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--right">
-        <div class="apos-modal-filters-search">
-          <input
-            class="apos-field-input apos-field-input-text"
-            type="text"
-            placeholder="Search Images..."
-            data-media-sources-search
-          />
-        </div>
-      </div>
-      {% endif %}
+      {% endfor %}
     </form>
   </div>
 {% endblock %}

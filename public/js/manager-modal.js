@@ -7,8 +7,8 @@ apos.define('apostrophe-images-manager-modal', {
     self.afterRefresh = function (callback) {
       const $mediaSources = self.$el.find('[data-media-sources]');
 
-      const connectors = JSON.parse(apos.connectors);
-      const $connectors = connectors.reduce((acc, connector) => {
+      const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
+      const $connectors = mediaSourceConnectors.reduce((acc, connector) => {
         return `${acc}<option>${connector.label}</option>`;
       }, '');
 
@@ -53,10 +53,6 @@ apos.define('media-source-browser', {
         // Here do import
       });
 
-      self.$el.on('input', 'input[data-media-sources-search]', async function() {
-        await apos.utils.post('/modules/apostrophe-images/find/apostrophe-images-connector-unsplash', {});
-      });
-
       return superBeforeShow(callback);
     };
 
@@ -68,28 +64,16 @@ apos.define('media-source-browser', {
 
     self.getFormData = () => {
       const $form = self.$el.find('[data-media-sources-form]');
+      const filters = $form.find('[data-media-sources-filter]');
+      const values = {};
 
-      const widthValue = $form.find('[data-media-sources-width-value]').val();
-      const widthRange = $form.find('[data-media-sources-width-range]').val();
-      const heightValue = $form.find('[data-media-sources-height-value]').val();
-      const heightRange = $form.find('[data-media-sources-height-range]').val();
-      const orientation = $form.find('[data-media-sources-orientation]').val();
-      const extension = $form.find('[data-media-sources-extension]').val();
-      const search = $form.find('[data-media-sources-search]').val();
+      filters.each(function() {
+        if (this.value) {
+          values[this.title] = this.value;
+        }
+      });
 
-      return {
-        ...widthValue && {
-          widthValue,
-          widthRange
-        },
-        ...heightValue && {
-          heightValue,
-          heightRange
-        },
-        ...orientation && orientation !== 'All' && { orientation },
-        ...extension && extension !== 'All' && { extension },
-        ...search && { search }
-      };
+      return values;
     };
   }
 });

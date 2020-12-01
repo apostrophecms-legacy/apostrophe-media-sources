@@ -16,7 +16,10 @@ module.exports = {
             ? connectors
             : [
               ...connectors,
-              moduleConfig.options.label
+              {
+                label: moduleConfig.options.label,
+                ...moduleConfig.options.mediaSourceConnector
+              }
             ];
         }, []);
 
@@ -38,7 +41,11 @@ module.exports = {
     });
 
     self.route('post', 'find/:connector', function(req, res) {
-      self.apos.modules[req.params.connector].find(req, {});
+      if (self.apos.modules[req.params.connector] &&
+        self.apos.modules[req.params.connector].find &&
+        typeof self.apos.modules[req.params.connector].find === 'function') {
+        self.apos.modules[req.params.connector].find(req, {});
+      }
     });
   }
 };

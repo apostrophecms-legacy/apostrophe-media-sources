@@ -9,7 +9,7 @@ apos.define('apostrophe-images-manager-modal', {
 
       const connectors = JSON.parse(apos.connectors);
       const $connectors = connectors.reduce((acc, connector) => {
-        return `${acc}<option>${connector}</option>`;
+        return `${acc}<option>${connector.label}</option>`;
       }, '');
 
       const selectClasses = 'class="apos-field-input apos-field-input-select"';
@@ -53,7 +53,17 @@ apos.define('media-source-browser', {
         // Here do import
       });
 
+      self.$el.on('input', 'input[data-media-sources-search]', async function() {
+        await apos.utils.post('/modules/apostrophe-images/find/apostrophe-images-connector-unsplash', {});
+      });
+
       return superBeforeShow(callback);
+    };
+
+    self.afterShow = function(callback) {
+      const input = self.$el.find('.apos-modal-filters-search input')[0];
+      input.focus();
+      return callback;
     };
 
     self.getFormData = () => {

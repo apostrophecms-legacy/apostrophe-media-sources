@@ -2,7 +2,7 @@
 {% import 'apostrophe-ui:components/buttons.html' as buttons %}
 {% import 'apostrophe-ui:components/fields.html' as fields with context %}
 
-{% block label %}Browse {{ data.provider }} Images{% endblock %}
+{% block label %}{{ __ns('apostrophe', 'Browse') }} {{ data.provider }} {{ __ns('apostrophe', 'Images') }}{% endblock %}
 
 {% block controls %}
   <div class="apos-modal-controls">
@@ -22,16 +22,45 @@
           </div>
         </span>
 
+        {% if 'orientation' in data.options.standardFilters %}
+          <div class="apos-modal-filter">
+            <label>{{ __ns('apostrophe', 'Orientation') }}</label>
+            <div class="apos-field-input-select-wrapper">
+              <select
+                class="apos-field-input apos-field-input-select"
+                data-media-sources-filter
+                title="orientation"
+              >
+                <option value="">{{ __ns('apostrophe', 'All') }}</option>
+                <option value="landscape">{{ __ns('apostrophe', 'Landscape') }}</option>
+                <option value="portrait">{{ __ns('apostrophe', 'Portrait') }}</option>
+                <option value="square">{{ __ns('apostrophe', 'Square') }}</option>
+              </select>
+            </div>
+          </div>
+        {% endif %}
+
         {% for filter in data.options.customFilters %}
           <div class="apos-modal-filter">
             <label>{{ __ns('apostrophe', filter.label) }}</label>
-            {% if filter.type === 'input' %}
+            {% if filter.type === 'select' %}
+              <div class="apos-field-input-select-wrapper">
+                <select
+                  class="apos-field-input apos-field-input-select"
+                  data-media-sources-filter
+                  title="{{ filter.name }}"
+                >
+                  {% for choice in filter.choices %}
+                    <option value="{{ choice.value }}">{{ __ns('apostrophe', choice.label) }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% else %}
               <div class="apos-field-group">
                 <input
                   class="apos-field-input apos-field-input-text"
-                  type="number"
-                  min="0"
-                  data-media-sources-{{ filter.name }}-value
+                  type="{{ filter.inputType or 'text' }}"
+                  {% if filter.inputType === 'number' -%} min="0" {%- endif %}
                   data-media-sources-filter
                   title="{{ filter.name }}"
                 />
@@ -47,40 +76,24 @@
                   </div>
                 {% endif %}
               </div>
-            {% elif filter.type === 'select' %}
-              <div class="apos-field-input-select-wrapper">
-                <select
-                  class="apos-field-input apos-field-input-select"
-                  data-media-sources-{{ filter.name }}
-                  data-media-sources-filter
-                  title="{{ filter.name }}"
-                >
-                  {% for choice in filter.choices %}
-                    <option value="{{ choice.value }}">{{ __ns('apostrophe', choice.label) }}</option>
-                  {% endfor %}
-                </select>
-              </div>
             {% endif %}
           </div>
         {% endfor %}
       </div>
 
-      {% for filter in data.options.standardFilters %}
-        {% if filter === 'search' %}
-          <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--right">
-            <div class="apos-modal-filters-search">
-              <input
-                class="apos-field-input apos-field-input-text"
-                type="text"
-                placeholder="{{ __ns('apostrophe', 'Search Images...') }}"
-                data-media-sources-search
-                data-media-sources-filter
-                title="search"
-              />
-            </div>
+      {% if 'search' in data.options.standardFilters %}
+        <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--right">
+          <div class="apos-modal-filters-search">
+            <input
+              class="apos-field-input apos-field-input-text"
+              type="text"
+              placeholder="{{ __ns('apostrophe', 'Search Images...') }}"
+              data-media-sources-filter
+              title="search"
+            />
           </div>
-        {% endif %}
-      {% endfor %}
+        </div>
+      {% endif %}
     </form>
   </div>
 {% endblock %}

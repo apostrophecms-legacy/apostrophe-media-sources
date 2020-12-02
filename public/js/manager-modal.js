@@ -57,8 +57,10 @@ apos.define('media-source-browser', {
     };
 
     self.afterShow = function(callback) {
-      const input = self.$el.find('.apos-modal-filters-search input')[0];
-      input.focus();
+      const searchInput = self.$el.find('.apos-modal-filters-search [data-media-sources-search]')[0];
+      if (searchInput) {
+        searchInput.focus();
+      }
       return callback;
     };
 

@@ -4,6 +4,15 @@
 
 {% block label %}{{ data.label }}{% endblock %}
 
+{%- block controls -%}
+  <button
+    class="apos-button apos-button--major apos-button--disabled"
+    type="button"
+    data-apos-import>
+    <span class="apos-button-label">Import</span>
+  </button>
+{%- endblock -%}
+
 {% block filters %}
   <div
     class="apos-clearfix apos-modal-filters-inner"

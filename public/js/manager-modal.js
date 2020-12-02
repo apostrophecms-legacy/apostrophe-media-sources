@@ -41,15 +41,17 @@ apos.define('media-source-browser', {
     self.results = [];
     self.choices = [];
 
+    self.resizeContentHeight = () => {};
+
     // const superBeforeShow = self.beforeShow;
     self.beforeShow = async (done) => {
-      self.filters = self.$el.find('[data-filters');
       self.$manageView = self.$el.find('[data-apos-manage-view]');
       self.$filters = self.$modalFilters.find('[data-filters]');
 
       self.enableCheckboxEvents();
       await self.requestMediaSource(1);
 
+      // Make search when clicking on enter
       self.$filters.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
           self.requestMediaSource(1);
@@ -88,7 +90,6 @@ apos.define('media-source-browser', {
     self.enableCheckboxEvents = function() {
       self.$el.on('change', 'input[type="checkbox"][name="select-all"]', function () {
         const checked = $(this).prop('checked');
-
         const $pieces = self.$el.find('[data-piece]');
 
         $pieces.each(function() {
@@ -97,6 +98,7 @@ apos.define('media-source-browser', {
           $(this).find('input[type="checkbox"]').prop('checked', checked);
           self.addOrRemoveChoice(id, !checked);
         });
+        self.toggleImportButton();
       });
 
       self.$el.on('change', '[data-piece] input[type="checkbox"]', function(e) {
@@ -104,6 +106,7 @@ apos.define('media-source-browser', {
         const id = $box.closest('[data-piece]').attr('data-media-source-id');
 
         self.addOrRemoveChoice(id, !$box.prop('checked'));
+        self.toggleImportButton();
       });
 
       // Add ability to select multiple checkboxes (Using Left Shift)
@@ -111,7 +114,6 @@ apos.define('media-source-browser', {
       // Clicks on checkbox directly are not possible because as visibility:hidden is set on it and clicks won't be detected.
       self.$el.on('click', '.apos-field-input-checkbox-indicator', function (e) {
         const box = $(this).siblings('.apos-field-input-checkbox')[0];
-        // const checked = $(box).prop('checked');
 
         // Store a variable called lastchecked to point to the last checked checkbox. If it is undefined it's the first checkbox that's selected.
         if (!lastChecked) {
@@ -146,8 +148,19 @@ apos.define('media-source-browser', {
             });
           }
         }
+        self.toggleImportButton();
         lastChecked = box;
       });
+    };
+
+    self.toggleImportButton = () => {
+      const $importButton = self.$el.find('[data-apos-import]');
+
+      if (self.choices.length) {
+        $importButton.removeClass('apos-button--disabled');
+      } else {
+        $importButton.addClass('apos-button--disabled');
+      }
     };
 
     self.addOrRemoveChoice = (id, remove = false) => {

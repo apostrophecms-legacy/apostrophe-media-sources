@@ -5,10 +5,6 @@
 {% set propertyLabels = data.options.propertyLabels %}
 {% set item = data.item %}
 
-{% for ingredient, amount in food %}
-  Utilisez {{ amount }} de {{ ingredient }}
-{% endfor %}
-
 {%- block modalClass -%}
   apos-pieces-editor apos-ui-modal-no-sidebar apos-modal-slideable
 {%- endblock -%}
@@ -79,7 +75,7 @@
               </label>
               <input
                 name="title"
-                placeholder=""
+                readonly
                 class="apos-field-input apos-field-input-text"
                 type="text"
                 value="{{ item.title }}">
@@ -95,7 +91,7 @@
                 </label>
                 <input
                   name="description"
-                  placeholder=""
+                  readonly
                   class="apos-field-input apos-field-input-text"
                   type="text"
                   value="{{ item.description }}">

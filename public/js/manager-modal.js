@@ -43,12 +43,16 @@ apos.define('media-source-browser', {
     self.results = [];
     self.choices = [];
     self.currentPage = 1;
+    self.totalPages = 0;
 
     self.resizeContentHeight = () => {};
 
     self.beforeShow = async (callback) => {
       self.$manageView = self.$el.find('[data-apos-manage-view]');
       self.$filters = self.$modalFilters.find('[data-filters]');
+      self.$items = self.$el.find('[data-items]');
+      self.perPage = self.$items.attr('data-items');
+      self.totalItems = self.$items.attr('data-total-items');
 
       self.enableCheckboxEvents();
       await self.requestMediaSource(1);
@@ -62,10 +66,12 @@ apos.define('media-source-browser', {
 
       $(document).keydown(({ originalEvent }) => {
         // Left arrow
-        if (originalEvent.keyCode === 37 && self.currentPage > 1) {
-          self.requestMediaSource(self.currentPage - 1);
+        if (originalEvent.keyCode === 37) {
+          const isFirstPage = self.currentPage === 1;
+          self.requestMediaSource(isFirstPage ? self.totalPages : self.currentPage - 1);
         } else if (originalEvent.keyCode === 39) {
-          self.requestMediaSource(self.currentPage + 1);
+          const isLastPage = self.currentPage === self.totalPages;
+          self.requestMediaSource(isLastPage ? 1 : self.currentPage + 1);
         }
       });
 
@@ -199,16 +205,16 @@ apos.define('media-source-browser', {
         } = await apos.utils.post(action, formData);
 
         self.currentPage = page;
+        self.totalPages = totalPages;
+        self.results = results;
 
         self.injectResultsLabel(results.length, total, page);
         self.injectResultsList(results);
         self.injectResultsPager({
           current: page,
-          total: totalPages,
-          noResults: !results.length
+          total: totalPages
         });
 
-        self.results = results;
       } catch (err) {
         // TODO Show error to user
         console.log('err ===> ', err);
@@ -242,6 +248,7 @@ apos.define('media-source-browser', {
 
     self.injectResultsLabel = (numResults, total, page) => {
       const $resultsLabel = self.$el.find('[data-result-label]');
+      const isLastPage = page !== 1 && (numResults < self.perPage);
 
       if (!numResults) {
         $resultsLabel.empty();
@@ -250,16 +257,21 @@ apos.define('media-source-browser', {
         return;
       }
 
-      const end = page * numResults;
+      const end = isLastPage
+        ? total
+        : page * self.perPage;
+
       const start = end - (numResults - 1);
 
+      const limitedResultsMsg = total > self.totalItems
+        ? ` (Results have been limited around ${self.totalItems})`
+        : '';
+
       $resultsLabel.empty();
-      $resultsLabel.append(`Showing ${start} - ${end} of ${total}`);
+      $resultsLabel.append(`Showing ${start} - ${end} of ${total}${limitedResultsMsg}`);
     };
 
     self.injectResultsList = (results) => {
-      const $items = self.$el.find('[data-items]');
-
       const htmlToInject = results.reduce((acc, item) => {
         return `
           ${acc}
@@ -267,10 +279,10 @@ apos.define('media-source-browser', {
         `;
       }, '');
 
-      $items.empty();
-      $items.append(htmlToInject);
+      self.$items.empty();
+      self.$items.append(htmlToInject);
 
-      const items = $items.find('.apos-manage-grid-piece');
+      const items = self.$items.find('.apos-manage-grid-piece');
 
       items.each((index, item) => {
         const button = $(item).find('.apos-manage-grid-piece-controls button');
@@ -314,14 +326,14 @@ apos.define('media-source-browser', {
     };
 
     self.injectResultsPager = ({
-      current, total, noResults
+      current,
+      total
     }) => {
       const $pager = self.$el.find('[data-media-sources-pager]');
 
       const htmlPager = self.getHtmlPager({
         current,
-        total,
-        noResults
+        total
       });
 
       $pager.empty();
@@ -354,11 +366,13 @@ apos.define('media-source-browser', {
 
     self.getHtmlPager = ({
       current,
-      total,
-      noResults
+      total
     }) => {
-      if (noResults) {
-        return self.getHtmlPagerItem({ num: 1 });
+      if (!self.results.length) {
+        return self.getHtmlPagerItem({
+          num: 1,
+          isActive: true
+        });
       }
 
       const maxPages = 6;
@@ -366,7 +380,8 @@ apos.define('media-source-browser', {
 
       const hasGaps = total > maxPages;
 
-      // We add two for the gap and the last page if more than 4 pages
+      // We create an array of numbers to iterate from and
+      // we add two for the gap and the last page if more than 4 pages
       const pagerIterator = [ ...Array(pagerSize + (hasGaps ? 2 : 0)).keys() ];
 
       const pagerToInject = pagerIterator.reduce((acc, index) => {

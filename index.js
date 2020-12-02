@@ -34,8 +34,8 @@ module.exports = {
 
       const connectorModule = self.apos.modules[moduleName];
 
-      return self.renderAndSend(req, 'media-source-browser', {
-        label: provider,
+      return self.renderAndSend(req, 'mediaSourceBrowser', {
+        provider,
         options: {
           action: `${self.action}/find/${moduleName}`,
           ...connectorModule.options.mediaSourceConnector
@@ -50,14 +50,13 @@ module.exports = {
         `apostrophe-images-connector-${provider.toLowerCase()}`
       ];
 
-      return self.renderAndSend(req, 'mediaSourceBrowserEditor', {
+      return self.renderAndSend(req, 'mediaSourceBrowserPreview', {
         provider,
         item,
         options: connectorModule.options.mediaSourceConnector
       });
     });
 
-    // TODO : Req response here
     self.route('post', 'find/:connector', async function(req, res) {
       try {
         const currentModule = self.apos.modules[req.params.connector];
@@ -70,11 +69,14 @@ module.exports = {
 
           return res.status(200).send(data);
         }
-
         res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
       } catch (err) {
-        res.status((err.response && err.response.status) || err.status || 500)
-          .send((err.response && err.response.data) || err.statusText);
+        if (err.response) {
+          const { status, data } = err.response;
+          return res.status(status || 500).send(data);
+        }
+
+        res.status(500).send(err);
       }
     });
   }

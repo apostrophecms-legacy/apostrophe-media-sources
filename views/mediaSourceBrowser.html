@@ -3,7 +3,7 @@
 {% import 'apostrophe-ui:components/fields.html' as fields with context %}
 {% import 'apostrophe-pager:macros.html' as pager with context %}
 
-{% block label %}Browse {{ data.provider }} Images{% endblock %}
+{% block label %}{{ data.provider }} Images{% endblock %}
 
 {% block controls %}
   <div class="apos-modal-controls">
@@ -113,7 +113,11 @@
     <div class="apos-manage-showing">
       <div class='apos-manage-result-label' data-result-label></div>
     </div>
-    <div class="apos-manage-grid-page" data-items></div>
+    <div
+      class="apos-manage-grid-page"
+      data-items="{{data.options.perPage}}"
+      data-total-items="{{data.options.totalResults}}"
+      ></div>
   </div>
 </div>
 {% endblock %}

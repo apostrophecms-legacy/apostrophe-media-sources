@@ -30,11 +30,16 @@ module.exports = {
     self.route('post', 'media-source-browser', function(req, res) {
       const { provider } = req.body;
 
-      const connectorModule = self.apos.modules[`apostrophe-images-connector-${provider.toLowerCase()}`];
+      const moduleName = `apostrophe-images-connector-${provider.toLowerCase()}`;
+
+      const connectorModule = self.apos.modules[moduleName];
 
       return self.renderAndSend(req, 'media-source-browser', {
         label: provider,
-        options: connectorModule.options.mediaSourceConnector
+        options: {
+          action: `${self.action}/find/${moduleName}`,
+          ...connectorModule.options.mediaSourceConnector
+        }
       });
     });
 
@@ -53,12 +58,23 @@ module.exports = {
     });
 
     // TODO : Req response here
-    self.route('post', 'find/:connector', function(req, res) {
-      if (self.apos.modules[req.params.connector] &&
-        self.apos.modules[req.params.connector].find &&
-        typeof self.apos.modules[req.params.connector].find === 'function' &&
-        self.apos.modules[req.params.connector].options.mediaSourceConnector) {
-        self.apos.modules[req.params.connector].find(req, {});
+    self.route('post', 'find/:connector', async function(req, res) {
+      try {
+        const currentModule = self.apos.modules[req.params.connector];
+
+        if (currentModule &&
+          currentModule.find &&
+          typeof currentModule.find === 'function' &&
+          currentModule.options.mediaSourceConnector) {
+          const data = await currentModule.find(req, req.body);
+
+          return res.status(200).send(data);
+        }
+
+        res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
+      } catch (err) {
+        res.status((err.response && err.response.status) || err.status)
+          .send((err.response && err.response.data) || err.statusText);
       }
     });
   }

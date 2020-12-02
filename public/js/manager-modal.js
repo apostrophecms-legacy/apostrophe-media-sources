@@ -59,11 +59,11 @@ apos.define('media-source-browser', {
         }
       });
 
-      self.$el.on('change', 'select[data-media-sources-orientation]', function() {
+      self.$el.on('change', 'select[data-media-sources-filter]', function() {
         self.requestMediaSource(1);
       });
 
-      self.$el.on('input', 'input[data-media-sources-search]', debounce(function() {
+      self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
         self.requestMediaSource(1);
       }, 500));
 
@@ -173,7 +173,7 @@ apos.define('media-source-browser', {
       self.choices.push(id);
     };
 
-    self.requestMediaSource = async (page) => {
+    self.requestMediaSource = async (page = 1) => {
       try {
         const formData = {
           ...self.getFormData(self.$filters),
@@ -216,8 +216,7 @@ apos.define('media-source-browser', {
     };
 
     self.getFormData = () => {
-      const $form = self.$el.find('[data-media-sources-form]');
-      const filters = $form.find('[data-media-sources-filter]');
+      const filters = self.$filters.find('[data-media-sources-filter]');
       const values = {};
 
       filters.each(function() {

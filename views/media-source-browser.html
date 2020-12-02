@@ -8,18 +8,13 @@
 {% block controls %}
   <div class="apos-modal-controls">
     {{ buttons.minor('Finished', { action: 'cancel' }) }}
-    {{ buttons.major('Import', { action: 'import', attributes: 'data-import' }) }}
+    {{ buttons.base('Import', {
+        action: 'import',
+        attributes: 'data-apos-import'
+        }, 'apos-button--major apos-button--disabled')
+    }}
   </div>
 {% endblock %}
-
-{%- block controls -%}
-  <button
-    class="apos-button apos-button--major apos-button--disabled"
-    type="button"
-    data-apos-import>
-    <span class="apos-button-label">Import</span>
-  </button>
-{%- endblock -%}
 
 {% block filters %}
   <div
@@ -44,7 +39,6 @@
                   class="apos-field-input apos-field-input-text"
                   type="number"
                   min="0"
-                  data-media-sources-{{ filter.name }}-value
                   data-media-sources-filter
                   title="{{ filter.name }}"
                 />
@@ -64,7 +58,6 @@
               <div class="apos-field-input-select-wrapper">
                 <select
                   class="apos-field-input apos-field-input-select"
-                  data-media-sources-{{ filter.name }}
                   data-media-sources-filter
                   title="{{ filter.name }}"
                 >
@@ -86,7 +79,6 @@
                 class="apos-field-input apos-field-input-text"
                 type="text"
                 placeholder="{{ __ns('apostrophe', 'Search Images...') }}"
-                data-media-sources-search
                 data-media-sources-filter
                 title="search"
               />

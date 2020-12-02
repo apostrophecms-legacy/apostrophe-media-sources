@@ -73,7 +73,7 @@ module.exports = {
 
         res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
       } catch (err) {
-        res.status((err.response && err.response.status) || err.status)
+        res.status((err.response && err.response.status) || err.status || 500)
           .send((err.response && err.response.data) || err.statusText);
       }
     });

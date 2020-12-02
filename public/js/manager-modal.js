@@ -42,6 +42,7 @@ apos.define('media-source-browser', {
   construct: (self, options) => {
     self.results = [];
     self.choices = [];
+    self.currentPage = 1;
 
     self.resizeContentHeight = () => {};
 
@@ -56,6 +57,15 @@ apos.define('media-source-browser', {
       self.$filters.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
           self.requestMediaSource(1);
+        }
+      });
+
+      $(document).keydown(({ originalEvent }) => {
+        // Left arrow
+        if (originalEvent.keyCode === 37 && self.currentPage > 1) {
+          self.requestMediaSource(self.currentPage - 1);
+        } else if (originalEvent.keyCode === 39) {
+          self.requestMediaSource(self.currentPage + 1);
         }
       });
 
@@ -187,6 +197,8 @@ apos.define('media-source-browser', {
           total,
           totalPages
         } = await apos.utils.post(action, formData);
+
+        self.currentPage = page;
 
         self.injectResultsLabel(results.length, total, page);
         self.injectResultsList(results);

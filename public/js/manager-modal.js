@@ -6,10 +6,10 @@ apos.define('apostrophe-images-manager-modal', {
 
     self.afterRefresh = function (callback) {
       const $mediaSources = self.$el.find('[data-media-sources]');
-      const connectors = JSON.parse(apos.connectors);
 
-      const $connectors = connectors.reduce((acc, connector) => {
-        return `${acc}<option>${connector}</option>`;
+      const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
+      const $connectors = mediaSourceConnectors.reduce((acc, connector) => {
+        return `${acc}<option>${connector.label}</option>`;
       }, '');
 
       const selectClasses = 'class="apos-field-input apos-field-input-select"';
@@ -21,13 +21,15 @@ apos.define('apostrophe-images-manager-modal', {
       superAfterRefresh(callback);
 
       self.$el.on('change', 'select[name="media-sources"]', function() {
-        const { value } = $(this)[0];
-
+        // TODO CHECK VALUE
+        const { value } = this;
         if (value !== 'Apostrophe') {
           apos.create('media-source-browser', {
             action: self.action,
             body: { provider: value }
           });
+          // Select "Apostrophe" in the dropdown: when coming back, the user can select again what he has just selected
+          setTimeout(() => (this.selectedIndex = 0), 250);
         }
       });
     };
@@ -43,8 +45,7 @@ apos.define('media-source-browser', {
 
     self.resizeContentHeight = () => {};
 
-    // const superBeforeShow = self.beforeShow;
-    self.beforeShow = async (done) => {
+    self.beforeShow = async (callback) => {
       self.$manageView = self.$el.find('[data-apos-manage-view]');
       self.$filters = self.$modalFilters.find('[data-filters]');
 
@@ -84,7 +85,7 @@ apos.define('media-source-browser', {
         };
       };
 
-      done();
+      callback();
     };
 
     self.enableCheckboxEvents = function() {
@@ -202,28 +203,30 @@ apos.define('media-source-browser', {
       }
     };
 
-    self.getFormData = () => {
-      const widthValue = self.$filters.find('[data-media-sources-width-value]').val();
-      const widthRange = self.$filters.find('[data-media-sources-width-range]').val();
-      const heightValue = self.$filters.find('[data-media-sources-height-value]').val();
-      const heightRange = self.$filters.find('[data-media-sources-height-range]').val();
-      const orientation = self.$filters.find('[data-media-sources-orientation]').val();
-      const extension = self.$filters.find('[data-media-sources-extension]').val();
-      const search = self.$filters.find('[data-media-sources-search]').val();
+    self.link('import', function(e) {
+      // Here do import
+    });
 
-      return {
-        ...widthValue && {
-          widthValue,
-          widthRange
-        },
-        ...heightValue && {
-          heightValue,
-          heightRange
-        },
-        ...orientation && orientation !== 'All' && { orientation },
-        ...extension && extension !== 'All' && { extension },
-        ...search && { search }
-      };
+    self.afterShow = function(callback) {
+      const searchInput = self.$el.find('.apos-modal-filters-search [data-media-sources-search]')[0];
+      if (searchInput) {
+        searchInput.focus();
+      }
+      return callback;
+    };
+
+    self.getFormData = () => {
+      const $form = self.$el.find('[data-media-sources-form]');
+      const filters = $form.find('[data-media-sources-filter]');
+      const values = {};
+
+      filters.each(function() {
+        if (this.value) {
+          values[this.title] = this.value;
+        }
+      });
+
+      return values;
     };
 
     self.injectResultsLabel = (numResults, total, page) => {

@@ -1,0 +1,122 @@
+{% extends 'editorBase.html' %}
+{% import 'apostrophe-ui:components/buttons.html' as buttons %}
+
+{% set propertyLabels = data.propertyLabels %}
+{% set item = data.item %}
+
+{%- block modalClass -%}
+  apos-pieces-editor apos-ui-modal-no-sidebar apos-modal-slideable
+{%- endblock -%}
+
+{%- block controls -%}
+  <div class="apos-modal-controls">
+    {{ buttons.minor('Finished', { action: 'cancel' }) }}
+    {{ buttons.base('Import', {
+        action: 'import',
+        attributes: 'data-apos-import'
+        }, 'apos-button--major')
+    }}
+  </div>
+{%- endblock -%}
+
+{%- block label -%}
+    {{ data.label }} {{ __ns('apostrophe', 'Details') }}
+{%- endblock -%}
+
+{%- block body -%}
+  <form class="apos-form" data-apos-form>
+  	<div class="apostrophe-image-editor-fields">
+      <div class="apos-schema-groups">
+        <div class="apos-schema-group apos-active" data-apos-group="basics">
+          <div class="apos-schema-group-inner">
+
+          <fieldset class="apos-field apos-field-attachment">
+            <label class="apos-field-label">
+              {{ __ns('apostrophe', 'Image File') }}
+            </label>
+          <div class="apos-attachment-existing">
+            <div class="apos-attachment-preview">
+              <img src="{{ item.thumbLink }}" alt="{{ item.title }}">
+            </div>
+            <span class="apos-attachment-info">
+              {{ item.title or __ns('apostrophe', 'No Title') }}
+            </span>
+            <span class="apos-attachment-info">
+              {{ item.width }} X {{ item.height }}
+            </span>
+            <div class="apos-button-group">
+              <a
+                class="apos-button apos-button--action"
+                href="{{ item.previewLink }}"
+                target="_blank">
+                {{ __ns('apostrophe', 'View File') }}
+              </a>
+            </div>
+          </div>
+          </fieldset>
+
+            <fieldset class="apos-field" data-name="title">
+              <label class="apos-field-label">
+                {{ propertyLabels.title or __ns('apostrophe', 'Title') }}
+              </label>
+              <input
+                name="title"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.title }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="description">
+                <label class="apos-field-label">
+                  {{ propertyLabels.description or __ns('apostrophe', 'Description') }}
+                </label>
+                <input
+                  name="description"
+                  disabled
+                  class="apos-field-input apos-field-input-text"
+                  type="text"
+                  value="{{ item.description }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="likes">
+                <label class="apos-field-label">
+                  {{ propertyLabels.likes or __ns('apostrophe', 'Likes') }}
+                </label>
+                <input
+                  name="likes"
+                  disabled
+                  class="apos-field-input apos-field-input-text"
+                  type="text"
+                  value="{{ item.likes }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="tags">
+              <label class="apos-field-label">
+                {{ propertyLabels.tags or __ns('apostrophe', 'Tags') }}
+              </label>
+              <input
+                name="title"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.tags | join(", ") }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="categories">
+              <label class="apos-field-label">
+                {{ propertyLabels.categories or __ns('apostrophe', 'Categories') }}
+              </label>
+              <input
+                name="categories"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.categories | join(", ") }}">
+            </fieldset>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+{%- endblock -%}

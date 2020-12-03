@@ -1,61 +1,115 @@
 
-.apos-ui.apos-modal .apos-modal-header {
-  .apos-modal-filters {
-    .apos-modal-media-sources-toggles {
-      margin: 1rem 0;
+.apos-ui.apos-modal {
+  .apos-modal-header {
+    .apos-modal-filters {
+      .apos-modal-media-sources-toggles {
+        margin: 1rem 0;
+
+        .apos-modal-filter {
+          label {
+            display: block;
+            margin-bottom: .8rem;
+          }
+
+          select {
+            margin-left: 0;
+          }
+        }
+      }
+    }
+
+    .apos-modal-filters[data-apos-modal-current='media-source-browser'] {
+      .apos-modal-filters-toggles {
+        align-items: flex-end;
+      }
 
       .apos-modal-filter {
+        display: flex;
+        flex-direction: column;
+        max-width: 10rem;
+
         label {
-          display: block;
-          margin-bottom: .8rem;
+          margin-bottom: 5px;
         }
 
         select {
+          min-width: 4.688rem;
+        }
+
+        .apos-field-group {
+          display: flex;
+          flex-direction: row;
+
+          input[type=number] {
+            appearance: textfield;
+          }
+
+          .apos-field-input-select {
+            margin-left: 10px;
+          }
+        }
+
+        .apos-field-input-text {
+          padding: .5rem;
+          width: 50%;
+        }
+
+        .apos-field-input-select {
           margin-left: 0;
         }
       }
     }
   }
 
-  .apos-modal-filters[data-apos-modal-current='media-source-browser'] {
-    .apos-modal-filters-toggles {
-      align-items: end;
+  &[data-apos-modal-current='media-source-browser'] {
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+    height: calc(100vh - 40px);
+
+    .apos-modal-contents {
+      flex: 1;
+      min-height: 0;
+
+      .apos-modal-content {
+        position: static;
+        display: flex;
+        flex-direction: column;
+        justify-content: stretch;
+        height: 100%;
+
+        .apos-modal-body {
+
+          .apos-manage-grid-view {
+            overflow: visible;
+          }
+        }
+      }
     }
 
-    .apos-modal-filter {
-      display: flex;
-      flex-direction: column;
-      max-width: 10rem;
+    .apos-modal-footer {
+      position: static;
+      .apos-modal-footer-inner {
+        justify-content: flex-end;
 
-      label {
-        margin-bottom: 5px;
-      }
-
-      select {
-        min-width: 4.688rem;
-      }
-
-      .apos-field-group {
-        display: flex;
-        flex-direction: row;
-
-        input[type=number] {
-          appearance: textfield;
-          // -moz-appearance: textfield;
-        }
-
-        .apos-field-input-select {
-          margin-left: 10px;
+        .apos-ui .apos-pager {
+          a {
+            cursor: pointer;
+          }
         }
       }
+    }
+  }
 
-      .apos-field-input-text {
-        padding: .5rem;
-        width: 50%;
-      }
+  &[data-apos-modal-current='media-source-browser-editor'] {
+    .apos-field-attachment {
+      width: 65%;
 
-      .apos-field-input-select {
-        margin-left: 0;
+      .apos-attachment-existing {
+        .apos-attachment-info {
+          display: block;
+          margin: .4rem 0;
+        }
       }
     }
   }

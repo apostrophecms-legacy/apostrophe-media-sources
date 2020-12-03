@@ -2,34 +2,41 @@
 {% import 'apostrophe-ui:components/buttons.html' as buttons %}
 {% import 'apostrophe-ui:components/fields.html' as fields with context %}
 
-{% block label %}{{ __ns('apostrophe', 'Browse') }} {{ data.provider }} {{ __ns('apostrophe', 'Images') }}{% endblock %}
+{% block label %}{{ data.label }} {{ __ns('apostrophe', 'Images') }}{% endblock %}
 
 {% block controls %}
   <div class="apos-modal-controls">
     {{ buttons.minor('Finished', { action: 'cancel' }) }}
-    {{ buttons.major('Import', { action: 'import', attributes: 'data-import' }) }}
+    {{ buttons.base('Import', {
+        action: 'import',
+        attributes: 'data-apos-import'
+        }, 'apos-button--major apos-button--disabled')
+    }}
   </div>
 {% endblock %}
 
 {% block filters %}
-  <div class="apos-clearfix apos-modal-filters-inner" data-filters>
-    <form class="apos-modal-filters-toggles" data-media-sources-form>
+  <div
+    class="apos-clearfix apos-modal-filters-inner"
+    data-filters
+    data-provider="{{data.label}}">
+    <div class="apos-modal-filters-toggles">
       <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--left">
-        <span class="apos-modal-filter">
+        <div class="apos-modal-filter">
           <label>{{ __ns('apostrophe', 'Select') }}</label>
           <div class="apos-modal-filter--padded">
             {{ fields.checkbox('select-all') }}
           </div>
-        </span>
+        </div>
 
-        {% if 'orientation' in data.options.standardFilters %}
+        {% if 'orientation' in data.standardFilters %}
           <div class="apos-modal-filter">
             <label>{{ __ns('apostrophe', 'Orientation') }}</label>
             <div class="apos-field-input-select-wrapper">
               <select
+                name="orientation"
                 class="apos-field-input apos-field-input-select"
                 data-media-sources-filter
-                title="orientation"
               >
                 <option value="">{{ __ns('apostrophe', 'All') }}</option>
                 <option value="landscape">{{ __ns('apostrophe', 'Landscape') }}</option>
@@ -40,15 +47,15 @@
           </div>
         {% endif %}
 
-        {% for filter in data.options.customFilters %}
+        {% for filter in data.customFilters %}
           <div class="apos-modal-filter">
             <label>{{ __ns('apostrophe', filter.label) }}</label>
             {% if filter.type === 'select' %}
               <div class="apos-field-input-select-wrapper">
                 <select
+                  name="{{filter.name}}"
                   class="apos-field-input apos-field-input-select"
                   data-media-sources-filter
-                  title="{{ filter.name }}"
                 >
                   {% for choice in filter.choices %}
                     <option value="{{ choice.value }}">{{ __ns('apostrophe', choice.label) }}</option>
@@ -58,11 +65,11 @@
             {% else %}
               <div class="apos-field-group">
                 <input
+                  name="{{ filter.name }}"
                   class="apos-field-input apos-field-input-text"
                   type="{{ filter.inputType or 'text' }}"
                   {% if filter.inputType === 'number' -%} min="0" {%- endif %}
                   data-media-sources-filter
-                  title="{{ filter.name }}"
                 />
                 {% if filter.range %}
                   <div class="apos-field-input-select-wrapper">
@@ -81,21 +88,40 @@
         {% endfor %}
       </div>
 
-      {% if 'search' in data.options.standardFilters %}
+      {% if 'search' in data.standardFilters %}
         <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--right">
           <div class="apos-modal-filters-search">
             <input
+              name="search"
               class="apos-field-input apos-field-input-text"
               type="text"
               placeholder="{{ __ns('apostrophe', 'Search Images...') }}"
               data-media-sources-filter
-              title="search"
             />
           </div>
         </div>
       {% endif %}
-    </form>
+    </div>
   </div>
 {% endblock %}
 
-{% block body %}New content here{% endblock %}
+{# Populated with Ajax when searching for images #}
+{% block body %}
+<div class="apos-manage-view">
+  <div class="apos-manage-grid-view">
+    <div class="apos-manage-showing">
+      <div class='apos-manage-result-label' data-result-label></div>
+    </div>
+    <div class="apos-manage-grid-page" data-items></div>
+  </div>
+</div>
+{% endblock %}
+
+{# Populated with Ajax when searching for images #}
+{% block footer %}
+  <div class="apos-modal-footer-inner">
+    <div class="apos-ui">
+      <div class="apos-pager" data-media-sources-pager></div>
+    </div>
+  </div>
+{% endblock %}

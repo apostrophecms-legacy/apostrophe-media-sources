@@ -34,7 +34,12 @@ module.exports = {
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
-      return self.renderAndSend(req, 'mediaSourceBrowser', mediaSourceConnector);
+      const standardFilters = mediaSourceConnector.standardFilters.map((filter) => filter.name);
+
+      return self.renderAndSend(req, 'mediaSourceBrowser', {
+        ...mediaSourceConnector,
+        standardFilters
+      });
     });
 
     self.route('post', 'media-source-browser-editor', function(req, res) {
@@ -61,7 +66,7 @@ module.exports = {
 
           return res.status(200).send(data);
         }
-        res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
+        res.status(404).send(`Connector not found: ${req.params.connector}`);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;
@@ -74,22 +79,23 @@ module.exports = {
 
     self.route('post', 'download', async function(req, res) {
       try {
+        console.log('req.body', require('util').inspect(req.body, { colors: true, depth: 1 }))
         const currentModule = self.apos.modules[req.params.connector];
 
         if (currentModule &&
-            currentModule.find &&
-            typeof currentModule.download === 'function' &&
-            currentModule.options.mediaSourceConnector) {
-            const data = await currentModule.download(req, req.params.id, req.params.title);
+          currentModule.find &&
+          typeof currentModule.download === 'function' &&
+          currentModule.options.mediaSourceConnector) {
+          const data = await currentModule.download(req, req.body);
 
-            return res.status(200).send(data);
-          }
-          res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
+          return res.status(200).send(data);
+        }
+        res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
       } catch (err) {
-          if (err.response) {
-            const { status, data } = err.response;
-            return res.status(status || 500).send(data);
-          }
+        if (err.response) {
+          const { status, data } = err.response;
+          return res.status(status || 500).send(data);
+        }
 
         res.status(500).send(err);
       }

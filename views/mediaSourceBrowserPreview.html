@@ -10,7 +10,6 @@
 {%- endblock -%}
 
 {%- block controls -%}
-  {# {{ module.editControls() }} #}
   <button class="apos-button apos-button--minor" type="button" data-apos-cancel="">
     <span class="apos-button-label">Cancel</span>
   </button>
@@ -65,7 +64,7 @@
           </fieldset>
 
             <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="title">
-              <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+              <label class="apos-field-label">
                 {% if propertyLabels.title %}
                   {{ propertyLabels.title }}
                 {% else %}
@@ -81,7 +80,7 @@
             </fieldset>
 
             <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="description">
-                <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+                <label class="apos-field-label">
                   {% if propertyLabels.description %}
                     {{ propertyLabels.description }}
                   {% else %}
@@ -97,7 +96,7 @@
             </fieldset>
 
             <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="likes">
-                <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+                <label class="apos-field-label">
                   {% if propertyLabels.likes %}
                     {{ propertyLabels.likes }}
                   {% else %}
@@ -113,7 +112,7 @@
             </fieldset>
 
             <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="tags">
-              <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+              <label class="apos-field-label">
                 {% if propertyLabels.tags %}
                   {{ propertyLabels.tags }}
                 {% else %}
@@ -129,7 +128,7 @@
             </fieldset>
 
             <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="categories">
-              <label for="cki5uqe280015pvh9u50k5hhn" class="apos-field-label">
+              <label class="apos-field-label">
                 {% if propertyLabels.categories %}
                   {{ propertyLabels.categories }}
                 {% else %}
@@ -149,7 +148,3 @@
     </div>
   </form>
 {%- endblock -%}
-
-{% block footerContainer %}
-  fOOTER
-{% endblock %}

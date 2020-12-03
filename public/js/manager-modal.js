@@ -51,6 +51,7 @@ apos.define('media-source-browser', {
       self.$manageView = self.$el.find('[data-apos-manage-view]');
       self.$filters = self.$modalFilters.find('[data-filters]');
       self.$items = self.$el.find('[data-items]');
+      self.$searchInput = self.$el.find('.apos-modal-filters-search [data-media-sources-filter]')[0];
       self.provider = self.$filters.attr('data-provider');
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
@@ -59,6 +60,7 @@ apos.define('media-source-browser', {
         .find((connector) => connector.label === self.provider);
 
       self.enableCheckboxEvents();
+      self.disableOrEnableFilters();
       await self.requestMediaSource(1);
 
       // Make search when clicking on enter
@@ -83,14 +85,18 @@ apos.define('media-source-browser', {
         self.requestMediaSource(1);
       });
 
-      self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
-        self.requestMediaSource(1);
-      }, 500));
-
       self.link('apos-import', function() {
-        const items = self.choices.map(choice =>self.results.find(result => result.mediaSourceId === choice));
+        const items = self.choices.map(choice => self.results.find(result => result.mediaSourceId === choice));
 
       });
+
+      self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
+        const hasNoValue = !self.$searchInput.value.length;
+
+        self.disableOrEnableFilters(hasNoValue, 'search');
+
+        self.requestMediaSource(1);
+      }, 500));
 
       function debounce(func, wait, immediate) {
         let timeout;
@@ -111,6 +117,31 @@ apos.define('media-source-browser', {
       };
 
       callback();
+    };
+
+    self.disableOrEnableFilters = (disable = true, dependency) => {
+      const allFilters = [
+        ...self.mediaSourceConnector.standardFilters,
+        ...self.mediaSourceConnector.customFilters
+      ];
+
+      allFilters.forEach((filter) => {
+        if (filter.dependsOn) {
+          const $filter = self.$filters.find(`[name="${filter.name}"]`);
+
+          if (!dependency) {
+            $filter.prop('disabled', disable);
+          }
+
+          if (dependency && filter.dependsOn.includes('search')) {
+            const inputType = $filter.prop('type');
+            if (inputType === ('select-one') && disable) {
+              $filter[0].selectedIndex = 0;
+            }
+            $filter.prop('disabled', disable);
+          }
+        }
+      });
     };
 
     self.enableCheckboxEvents = function() {
@@ -224,14 +255,12 @@ apos.define('media-source-browser', {
 
       } catch (err) {
         // TODO Show error to user
-        console.log('err ===> ', err);
       }
     };
 
     self.afterShow = function(callback) {
-      const searchInput = self.$el.find('.apos-modal-filters-search [data-media-sources-filter]')[0];
-      if (searchInput) {
-        searchInput.focus();
+      if (self.$searchInput) {
+        self.$searchInput.focus();
       }
       return callback;
     };
@@ -242,7 +271,7 @@ apos.define('media-source-browser', {
 
       filters.each(function() {
         if (this.value) {
-          values[this.title] = this.value;
+          values[this.name] = this.value;
         }
       });
 

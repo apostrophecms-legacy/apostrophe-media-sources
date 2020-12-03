@@ -10,7 +10,6 @@
 {%- endblock -%}
 
 {%- block controls -%}
-  {# {{ module.editControls() }} #}
   <button class="apos-button apos-button--minor" type="button" data-apos-cancel="">
     <span class="apos-button-label">Cancel</span>
   </button>
@@ -73,7 +72,7 @@
               </label>
               <input
                 name="title"
-                readonly
+                disabled
                 class="apos-field-input apos-field-input-text"
                 type="text"
                 value="{{ item.title }}">
@@ -89,7 +88,7 @@
                 </label>
                 <input
                   name="description"
-                  readonly
+                  disabled
                   class="apos-field-input apos-field-input-text"
                   type="text"
                   value="{{ item.description }}">
@@ -105,7 +104,7 @@
                 </label>
                 <input
                   name="likes"
-                  readonly
+                  disabled
                   class="apos-field-input apos-field-input-text"
                   type="text"
                   value="{{ item.likes }}">
@@ -121,7 +120,7 @@
               </label>
               <input
                 name="title"
-                readonly
+                disabled
                 class="apos-field-input apos-field-input-text"
                 type="text"
                 value="{{ item.tags | join(", ") }}">
@@ -137,7 +136,7 @@
               </label>
               <input
                 name="categories"
-                readonly
+                disabled
                 class="apos-field-input apos-field-input-text"
                 type="text"
                 value="{{ item.categories | join(", ") }}">

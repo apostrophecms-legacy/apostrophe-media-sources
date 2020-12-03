@@ -71,5 +71,28 @@ module.exports = {
         res.status(500).send(err);
       }
     });
+
+    self.route('post', 'download', async function(req, res) {
+      try {
+        const currentModule = self.apos.modules[req.params.connector];
+
+        if (currentModule &&
+            currentModule.find &&
+            typeof currentModule.download === 'function' &&
+            currentModule.options.mediaSourceConnector) {
+            const data = await currentModule.download(req, req.params.id, req.params.title);
+
+            return res.status(200).send(data);
+          }
+          res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
+      } catch (err) {
+          if (err.response) {
+            const { status, data } = err.response;
+            return res.status(status || 500).send(data);
+          }
+
+        res.status(500).send(err);
+      }
+    });
   }
 };

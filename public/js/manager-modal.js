@@ -87,6 +87,11 @@ apos.define('media-source-browser', {
         self.requestMediaSource(1);
       }, 500));
 
+      self.link('apos-import', function() {
+        const items = self.choices.map(choice =>self.results.find(result => result.mediaSourceId === choice));
+
+      });
+
       function debounce(func, wait, immediate) {
         let timeout;
         return function() {
@@ -222,10 +227,6 @@ apos.define('media-source-browser', {
         console.log('err ===> ', err);
       }
     };
-
-    self.link('import', function(e) {
-      // Here do import
-    });
 
     self.afterShow = function(callback) {
       const searchInput = self.$el.find('.apos-modal-filters-search [data-media-sources-filter]')[0];

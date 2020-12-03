@@ -36,12 +36,10 @@
             </label>
           <div class="apos-attachment-existing">
             <div class="apos-attachment-preview">
-              <img
-                src="{{ item.thumbLink }}"
-                alt="">
+              <img src="{{ item.thumbLink }}" alt="{{ item.title }}">
             </div>
             <span class="apos-attachment-info">
-              {{ item.title or __ns('apostrophe', 'No Title')}}
+              {{ item.title or __ns('apostrophe', 'No Title') }}
             </span>
             <span class="apos-attachment-info">
               {{ item.width }} X {{ item.height }}
@@ -59,7 +57,7 @@
 
             <fieldset class="apos-field" data-name="title">
               <label class="apos-field-label">
-                {{ propertyLabels.title or __ns('apostrophe', 'Title')}}
+                {{ propertyLabels.title or __ns('apostrophe', 'Title') }}
               </label>
               <input
                 name="title"
@@ -71,7 +69,7 @@
 
             <fieldset class="apos-field" data-name="description">
                 <label class="apos-field-label">
-                  {{ propertyLabels.description or __ns('apostrophe', 'Description')}}
+                  {{ propertyLabels.description or __ns('apostrophe', 'Description') }}
                 </label>
                 <input
                   name="description"
@@ -83,7 +81,7 @@
 
             <fieldset class="apos-field" data-name="likes">
                 <label class="apos-field-label">
-                  {{ propertyLabels.likes or __ns('apostrophe', 'Likes')}}
+                  {{ propertyLabels.likes or __ns('apostrophe', 'Likes') }}
                 </label>
                 <input
                   name="likes"
@@ -95,7 +93,7 @@
 
             <fieldset class="apos-field" data-name="tags">
               <label class="apos-field-label">
-                {{ propertyLabels.tags or __ns('apostrophe', 'Tags')}}
+                {{ propertyLabels.tags or __ns('apostrophe', 'Tags') }}
               </label>
               <input
                 name="title"
@@ -107,7 +105,7 @@
 
             <fieldset class="apos-field" data-name="categories">
               <label class="apos-field-label">
-                {{ propertyLabels.categories or __ns('apostrophe', 'Categories')}}
+                {{ propertyLabels.categories or __ns('apostrophe', 'Categories') }}
               </label>
               <input
                 name="categories"

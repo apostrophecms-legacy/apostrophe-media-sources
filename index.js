@@ -61,7 +61,7 @@ module.exports = {
 
           return res.status(200).send(data);
         }
-        res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
+        res.status(404).send(`Connector not found: ${req.params.connector}`);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;

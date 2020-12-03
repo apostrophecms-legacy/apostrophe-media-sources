@@ -246,7 +246,6 @@ apos.define('media-source-browser', {
 
       } catch (err) {
         // TODO Show error to user
-        console.log('err ===> ', err);
       }
     };
 

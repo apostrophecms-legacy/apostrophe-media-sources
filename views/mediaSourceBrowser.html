@@ -35,9 +35,9 @@
             <label>{{ __ns('apostrophe', 'Orientation') }}</label>
             <div class="apos-field-input-select-wrapper">
               <select
+                name="orientation"
                 class="apos-field-input apos-field-input-select"
                 data-media-sources-filter
-                title="orientation"
               >
                 <option value="">{{ __ns('apostrophe', 'All') }}</option>
                 <option value="landscape">{{ __ns('apostrophe', 'Landscape') }}</option>
@@ -54,9 +54,9 @@
             {% if filter.type === 'select' %}
               <div class="apos-field-input-select-wrapper">
                 <select
+                  name="{{filter.name}}"
                   class="apos-field-input apos-field-input-select"
                   data-media-sources-filter
-                  title="{{ filter.name }}"
                 >
                   {% for choice in filter.choices %}
                     <option value="{{ choice.value }}">{{ __ns('apostrophe', choice.label) }}</option>
@@ -66,11 +66,11 @@
             {% else %}
               <div class="apos-field-group">
                 <input
+                  name="{{ filter.name }}"
                   class="apos-field-input apos-field-input-text"
                   type="{{ filter.inputType or 'text' }}"
                   {% if filter.inputType === 'number' -%} min="0" {%- endif %}
                   data-media-sources-filter
-                  title="{{ filter.name }}"
                 />
                 {% if filter.range %}
                   <div class="apos-field-input-select-wrapper">
@@ -93,11 +93,11 @@
         <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--right">
           <div class="apos-modal-filters-search">
             <input
+              name="search"
               class="apos-field-input apos-field-input-text"
               type="text"
               placeholder="{{ __ns('apostrophe', 'Search Images...') }}"
               data-media-sources-filter
-              title="search"
             />
           </div>
         </div>

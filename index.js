@@ -34,7 +34,12 @@ module.exports = {
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
-      return self.renderAndSend(req, 'mediaSourceBrowser', mediaSourceConnector);
+      const standardFilters = mediaSourceConnector.standardFilters.map((filter) => filter.name);
+
+      return self.renderAndSend(req, 'mediaSourceBrowser', {
+        ...mediaSourceConnector,
+        standardFilters
+      });
     });
 
     self.route('post', 'media-source-browser-editor', function(req, res) {

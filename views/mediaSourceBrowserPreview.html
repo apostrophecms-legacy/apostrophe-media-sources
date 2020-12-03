@@ -2,7 +2,7 @@
 {# {% extends "apostrophe-modal:base.html" %} #}
 {% extends 'editorBase.html' %}
 
-{% set propertyLabels = data.options.propertyLabels %}
+{% set propertyLabels = data.propertyLabels %}
 {% set item = data.item %}
 
 {%- block modalClass -%}
@@ -20,14 +20,12 @@
 {%- endblock -%}
 
 {%- block label -%}
-    {{ data.provider }} Details
+    {{ data.label }} Details
 {%- endblock -%}
 
 {%- block body -%}
   <form class="apos-form" data-apos-form>
-  {# {{ schemas.fields(data.schema) }} #}
   	<div class="apostrophe-image-editor-fields">
-      {# <div class="apos-schema-tabs" data-schema-tabs></div> #}
       <div class="apos-schema-groups">
         <div class="apos-schema-group apos-active" data-apos-group="basics">
           <div class="apos-schema-group-inner">
@@ -150,10 +148,6 @@
     </div>
   </form>
 {%- endblock -%}
-
-{%- block instructions -%}
-  {{ __ns('apostrophe', 'Fill out the fields to edit an existing %s.', (data.options.label | d(''))) }}
-{%- endblock -%}²
 
 {% block footerContainer %}
   fOOTER

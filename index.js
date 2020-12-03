@@ -9,51 +9,43 @@ module.exports = {
   construct: function(self, options) {
     self.on('apostrophe:modulesReady', 'getAllImagesConnectorsModules', () => {
       // Find all images connectors defined in app configuration
-      const connectors = Object.values(self.apos.modules)
-        .reduce((connectors, moduleConfig) => {
-          return !moduleConfig.options.mediaSourceConnector
+      self.connectors = Object.values(self.apos.modules)
+        .reduce((connectors, { options: moduleOptions }) => {
+          return !moduleOptions.mediaSourceConnector
             ? connectors
             : [
               ...connectors,
               {
-                label: moduleConfig.options.label,
-                ...moduleConfig.options.mediaSourceConnector
+                label: moduleOptions.label,
+                action: `${self.action}/find/${moduleOptions.name}`,
+                ...moduleOptions.mediaSourceConnector
               }
             ];
         }, []);
 
-      self.on('apostrophe-pages:beforeSend', 'sendConnectorsToBrowser', async (req) => {
-        req.browserCall('apos.mediaSourceConnectors=?', JSON.stringify(connectors));
+      self.on('apostrophe-pages:beforeSend', 'sendConnectorsToBrowser', (req) => {
+        req.browserCall('apos.mediaSourceConnectors=?', JSON.stringify(self.connectors));
       });
     });
 
     self.route('post', 'media-source-browser', function(req, res) {
       const { provider } = req.body;
 
-      const moduleName = `apostrophe-images-connector-${provider.toLowerCase()}`;
+      const mediaSourceConnector = self.connectors
+        .find((connector) => connector.label === provider);
 
-      const connectorModule = self.apos.modules[moduleName];
-
-      return self.renderAndSend(req, 'mediaSourceBrowser', {
-        provider,
-        options: {
-          action: `${self.action}/find/${moduleName}`,
-          ...connectorModule.options.mediaSourceConnector
-        }
-      });
+      return self.renderAndSend(req, 'mediaSourceBrowser', mediaSourceConnector);
     });
 
     self.route('post', 'media-source-browser-editor', function(req, res) {
       const { provider, item } = req.body;
 
-      const connectorModule = self.apos.modules[
-        `apostrophe-images-connector-${provider.toLowerCase()}`
-      ];
+      const mediaSourceConnector = self.connectors
+        .find((connector) => connector.label === provider);
 
       return self.renderAndSend(req, 'mediaSourceBrowserPreview', {
-        provider,
-        item,
-        options: connectorModule.options.mediaSourceConnector
+        ...mediaSourceConnector,
+        item
       });
     });
 

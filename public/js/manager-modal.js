@@ -51,8 +51,12 @@ apos.define('media-source-browser', {
       self.$manageView = self.$el.find('[data-apos-manage-view]');
       self.$filters = self.$modalFilters.find('[data-filters]');
       self.$items = self.$el.find('[data-items]');
-      self.perPage = self.$items.attr('data-items');
-      self.totalItems = self.$items.attr('data-total-items');
+      self.provider = self.$filters.attr('data-provider');
+
+      const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
+
+      self.mediaSourceConnector = mediaSourceConnectors
+        .find((connector) => connector.label === self.provider);
 
       self.enableCheckboxEvents();
       await self.requestMediaSource(1);
@@ -196,13 +200,11 @@ apos.define('media-source-browser', {
           page
         };
 
-        const { action } = self.$filters.data();
-
         const {
           results,
           total,
           totalPages
-        } = await apos.utils.post(action, formData);
+        } = await apos.utils.post(self.mediaSourceConnector.action, formData);
 
         self.currentPage = page;
         self.totalPages = totalPages;
@@ -248,7 +250,8 @@ apos.define('media-source-browser', {
 
     self.injectResultsLabel = (numResults, total, page) => {
       const $resultsLabel = self.$el.find('[data-result-label]');
-      const isLastPage = page !== 1 && (numResults < self.perPage);
+      const { perPage, totalResults } = self.mediaSourceConnector;
+      const isLastPage = page !== 1 && (numResults < perPage);
 
       if (!numResults) {
         $resultsLabel.empty();
@@ -259,12 +262,12 @@ apos.define('media-source-browser', {
 
       const end = isLastPage
         ? total
-        : page * self.perPage;
+        : page * perPage;
 
       const start = end - (numResults - 1);
 
-      const limitedResultsMsg = total > self.totalItems
-        ? ` (Results have been limited around ${self.totalItems})`
+      const limitedResultsMsg = total > totalResults
+        ? ` (Results have been limited around ${totalResults})`
         : '';
 
       $resultsLabel.empty();

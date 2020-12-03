@@ -129,6 +129,10 @@ apos.define('media-source-browser', {
           }
 
           if (dependency && filter.dependsOn.includes('search')) {
+            const inputType = $filter.prop('type');
+            if (inputType === ('select-one') && disable) {
+              $filter[0].selectedIndex = 0;
+            }
             $filter.prop('disabled', disable);
           }
         }

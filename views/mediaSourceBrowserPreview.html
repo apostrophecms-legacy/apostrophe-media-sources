@@ -1,4 +1,5 @@
 {% extends 'editorBase.html' %}
+{% import 'apostrophe-ui:components/buttons.html' as buttons %}
 
 {% set propertyLabels = data.propertyLabels %}
 {% set item = data.item %}
@@ -8,16 +9,18 @@
 {%- endblock -%}
 
 {%- block controls -%}
-  <button class="apos-button apos-button--minor" type="button" data-apos-cancel="">
-    <span class="apos-button-label">Cancel</span>
-  </button>
-  <button class="apos-button apos-button--major" type="button" data-apos-save="">
-    <span class="apos-button-label">Import</span>
-  </button>
+  <div class="apos-modal-controls">
+    {{ buttons.minor('Finished', { action: 'cancel' }) }}
+    {{ buttons.base('Import', {
+        action: 'import',
+        attributes: 'data-apos-import'
+        }, 'apos-button--major')
+    }}
+  </div>
 {%- endblock -%}
 
 {%- block label -%}
-    {{ data.label }} Details
+    {{ data.label }} {{ __ns('apostrophe', 'Details') }}
 {%- endblock -%}
 
 {%- block body -%}
@@ -29,7 +32,7 @@
 
           <fieldset class="apos-field apos-field-attachment">
             <label class="apos-field-label">
-              Image File
+              {{ __ns('apostrophe', 'Image File') }}
             </label>
           <div class="apos-attachment-existing">
             <div class="apos-attachment-preview">
@@ -47,9 +50,8 @@
               <a
                 class="apos-button apos-button--action"
                 href="{{ item.previewLink }}"
-                data-link=""
                 target="_blank">
-                View file
+                {{ __ns('apostrophe', 'View File') }}
               </a>
             </div>
           </div>

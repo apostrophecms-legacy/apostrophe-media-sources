@@ -60,15 +60,12 @@ module.exports = {
         const { connector, ...filters } = req.body;
         const currentModule = self.apos.modules[connector];
 
-        if (currentModule &&
-          currentModule.find &&
-          typeof currentModule.find === 'function' &&
-          currentModule.options.mediaSourceConnector) {
+        if (self.isMethodExist(currentModule, 'find')) {
           const data = await currentModule.find(req, filters);
 
           return res.status(200).send(data);
         }
-        res.status(404).send(`Connector not found: ${connector}`);
+        res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;
@@ -81,19 +78,15 @@ module.exports = {
 
     self.route('post', 'download', async function(req, res) {
       try {
-        console.log('req.body', require('util').inspect(req.body, { colors: true, depth: 1 }))
         const { connector, files } = req.body;
         const currentModule = self.apos.modules[connector];
 
-        if (currentModule &&
-          currentModule.find &&
-          typeof currentModule.download === 'function' &&
-          currentModule.options.mediaSourceConnector) {
+        if (self.isMethodExist(currentModule, 'download')) {
           const data = await currentModule.download(req, files);
 
           return res.status(200).send(data);
         }
-        res.status(404).send(`Connector not found: ${connector}`);
+        res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;
@@ -103,5 +96,11 @@ module.exports = {
         res.status(500).send(err);
       }
     });
+
+    self.isMethodExist = (module, method) => {
+      return module && module[method] &&
+        typeof module[method] === 'function' &&
+        module.options.mediaSourceConnector;
+    };
   }
 };

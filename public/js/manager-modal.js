@@ -1,21 +1,3 @@
-function debounce(func, wait, immediate) {
-  let timeout;
-  return function() {
-    const context = this;
-    const args = arguments;
-
-    const later = function() {
-      timeout = null;
-      !immediate && func.apply(context, args);
-    };
-
-    const callNow = immediate && !timeout;
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-    callNow && func.apply(context, args);
-  };
-};
-
 apos.define('apostrophe-images-manager-modal', {
   extend: 'apostrophe-pieces-manager-modal',
 
@@ -102,6 +84,24 @@ apos.define('media-source-browser', {
       self.$el.on('change', 'select[data-media-sources-filter]', function() {
         self.requestMediaSource(1);
       });
+
+      function debounce(func, wait, immediate) {
+        let timeout;
+        return function() {
+          const context = this;
+          const args = arguments;
+
+          const later = function() {
+            timeout = null;
+            !immediate && func.apply(context, args);
+          };
+
+          const callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          callNow && func.apply(context, args);
+        };
+      };
 
       self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
         const hasNoValue = !self.$searchInput.value.length;

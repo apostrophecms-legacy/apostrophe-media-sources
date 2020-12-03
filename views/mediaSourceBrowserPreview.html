@@ -1,5 +1,3 @@
-{# {%- extends "apostrophe-modal:baseSlideable.html" -%} #}
-{# {% extends "apostrophe-modal:base.html" %} #}
 {% extends 'editorBase.html' %}
 
 {% set propertyLabels = data.propertyLabels %}
@@ -29,25 +27,20 @@
         <div class="apos-schema-group apos-active" data-apos-group="basics">
           <div class="apos-schema-group-inner">
 
-          <fieldset class="apos-field apos-field-attachment apos-field-attachment apos-required" data-name="attachment">
+          <fieldset class="apos-field apos-field-attachment">
             <label class="apos-field-label">
               Image File
             </label>
-          <div class="apos-attachment-existing apos-extension-png" style="" data-existing="cki4aovjh002jixh9ldpx41pv">
+          <div class="apos-attachment-existing">
             <div class="apos-attachment-preview">
               <img
-                data-preview=""
                 src="{{ item.thumbLink }}"
                 alt="">
             </div>
-            <span class="apos-attachment-info" data-name="">
-            {% if item.title %}
-            {{ item.title }}
-            {% else %}
-            {{ __ns('apostrophe', "No Title") }}
-            {% endif %}
+            <span class="apos-attachment-info">
+              {{ propertyLabels.title or __ns('apostrophe', 'No Title')}}
             </span>
-            <span class="apos-attachment-info" data-name="">
+            <span class="apos-attachment-info">
               {{ item.width }} X {{ item.height }}
             </span>
             <div class="apos-button-group">
@@ -62,13 +55,9 @@
           </div>
           </fieldset>
 
-            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="title">
+            <fieldset class="apos-field" data-name="title">
               <label class="apos-field-label">
-                {% if propertyLabels.title %}
-                  {{ propertyLabels.title }}
-                {% else %}
-                  {{ __ns('apostrophe', "Title") }}
-                {% endif %}
+                {{ propertyLabels.title or __ns('apostrophe', 'Title')}}
               </label>
               <input
                 name="title"
@@ -78,13 +67,9 @@
                 value="{{ item.title }}">
             </fieldset>
 
-            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="description">
+            <fieldset class="apos-field" data-name="description">
                 <label class="apos-field-label">
-                  {% if propertyLabels.description %}
-                    {{ propertyLabels.description }}
-                  {% else %}
-                    {{ __ns('apostrophe', "Description") }}
-                  {% endif %}
+                  {{ propertyLabels.description or __ns('apostrophe', 'Description')}}
                 </label>
                 <input
                   name="description"
@@ -94,13 +79,9 @@
                   value="{{ item.description }}">
             </fieldset>
 
-            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="likes">
+            <fieldset class="apos-field" data-name="likes">
                 <label class="apos-field-label">
-                  {% if propertyLabels.likes %}
-                    {{ propertyLabels.likes }}
-                  {% else %}
-                    {{ __ns('apostrophe', "Likes") }}
-                  {% endif %}
+                  {{ propertyLabels.likes or __ns('apostrophe', 'Likes')}}
                 </label>
                 <input
                   name="likes"
@@ -110,13 +91,9 @@
                   value="{{ item.likes }}">
             </fieldset>
 
-            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="tags">
+            <fieldset class="apos-field" data-name="tags">
               <label class="apos-field-label">
-                {% if propertyLabels.tags %}
-                  {{ propertyLabels.tags }}
-                {% else %}
-                  {{ __ns('apostrophe', "Tags") }}
-                {% endif %}
+                {{ propertyLabels.tags or __ns('apostrophe', 'Tags')}}
               </label>
               <input
                 name="title"
@@ -126,13 +103,9 @@
                 value="{{ item.tags | join(", ") }}">
             </fieldset>
 
-            <fieldset class="apos-field apos-field-string apos-field-first-name " data-name="categories">
+            <fieldset class="apos-field" data-name="categories">
               <label class="apos-field-label">
-                {% if propertyLabels.categories %}
-                  {{ propertyLabels.categories }}
-                {% else %}
-                  {{ __ns('apostrophe', "Categories") }}
-                {% endif %}
+                {{ propertyLabels.categories or __ns('apostrophe', 'Categories')}}
               </label>
               <input
                 name="categories"

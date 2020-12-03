@@ -85,9 +85,14 @@ apos.define('media-source-browser', {
         self.requestMediaSource(1);
       });
 
-      self.link('apos-import', function() {
-        const items = self.choices.map(choice => self.results.find(result => result.mediaSourceId === choice));
+      self.link('apos-import', async function() {
+        const files = self.choices.map(choice => self.results.find(result => result.mediaSourceId === choice));
+        const formData = {
+          files,
+          connector: self.mediaSourceConnector.name
+        };
 
+        await apos.utils.post(`${self.mediaSourceConnector.action}/download`, formData);
       });
 
       self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
@@ -233,14 +238,15 @@ apos.define('media-source-browser', {
       try {
         const formData = {
           ...self.getFormData(self.$filters),
-          page
+          page,
+          connector: self.mediaSourceConnector.name
         };
 
         const {
           results,
           total,
           totalPages
-        } = await apos.utils.post(self.mediaSourceConnector.action, formData);
+        } = await apos.utils.post(`${self.mediaSourceConnector.action}/find`, formData);
 
         self.currentPage = page;
         self.totalPages = totalPages;

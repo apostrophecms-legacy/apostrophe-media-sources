@@ -16,8 +16,9 @@ module.exports = {
             : [
               ...connectors,
               {
+                name: moduleOptions.name,
                 label: moduleOptions.label,
-                action: `${self.action}/find/${moduleOptions.name}`,
+                action: `${self.action}`,
                 ...moduleOptions.mediaSourceConnector
               }
             ];
@@ -54,19 +55,20 @@ module.exports = {
       });
     });
 
-    self.route('post', 'find/:connector', async function(req, res) {
+    self.route('post', 'find', async function(req, res) {
       try {
-        const currentModule = self.apos.modules[req.params.connector];
+        const { connector, ...filters } = req.body;
+        const currentModule = self.apos.modules[connector];
 
         if (currentModule &&
           currentModule.find &&
           typeof currentModule.find === 'function' &&
           currentModule.options.mediaSourceConnector) {
-          const data = await currentModule.find(req, req.body);
+          const data = await currentModule.find(req, filters);
 
           return res.status(200).send(data);
         }
-        res.status(404).send(`Connector not found: ${req.params.connector}`);
+        res.status(404).send(`Connector not found: ${connector}`);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;
@@ -80,17 +82,18 @@ module.exports = {
     self.route('post', 'download', async function(req, res) {
       try {
         console.log('req.body', require('util').inspect(req.body, { colors: true, depth: 1 }))
-        const currentModule = self.apos.modules[req.params.connector];
+        const { connector, files } = req.body;
+        const currentModule = self.apos.modules[connector];
 
         if (currentModule &&
           currentModule.find &&
           typeof currentModule.download === 'function' &&
           currentModule.options.mediaSourceConnector) {
-          const data = await currentModule.download(req, req.body);
+          const data = await currentModule.download(req, files);
 
           return res.status(200).send(data);
         }
-        res.status(404).send(`This connector doesn't exist: ${req.params.connector}`);
+        res.status(404).send(`Connector not found: ${connector}`);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;

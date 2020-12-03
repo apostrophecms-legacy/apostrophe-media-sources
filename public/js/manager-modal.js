@@ -21,9 +21,8 @@ apos.define('apostrophe-images-manager-modal', {
       superAfterRefresh(callback);
 
       self.$el.on('change', 'select[name="media-sources"]', function() {
-        // TODO CHECK VALUE
         const { value } = this;
-        if (value !== 'Apostrophe') {
+        if (value.toLowerCase() !== 'apostrophe') {
           apos.create('media-source-browser', {
             action: self.action,
             body: { provider: value }

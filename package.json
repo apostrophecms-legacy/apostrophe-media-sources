@@ -1,5 +1,5 @@
 {
-  "name": "apostrophe-images-connector",
+  "name": "apostrophe-media-sources",
   "version": "1.0.0",
   "description": "A set of modules that ease importing of web-compatible image content from various media sources, including DAMs and Unsplash, into Apostrophe's media library",
   "main": "index.js",

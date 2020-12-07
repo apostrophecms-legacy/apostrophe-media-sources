@@ -14,21 +14,22 @@ apos.define('apostrophe-images-manager-modal', {
 
       const selectClasses = 'class="apos-field-input apos-field-input-select"';
 
-      const $select = `<select name="media-sources" ${selectClasses}><option>Apostrophe</option>${$connectors}</select>`;
+      const $select = `<select name="media-sources" ${
+        selectClasses}><option>Apostrophe</option>${$connectors}</select>`;
 
       $mediaSources.append($select);
 
       superAfterRefresh(callback);
 
       self.$el.on('change', 'select[name="media-sources"]', function() {
-        // TODO CHECK VALUE
         const { value } = this;
-        if (value !== 'Apostrophe') {
-          apos.create('media-source-browser', {
+        if (value.toLowerCase() !== 'apostrophe') {
+          apos.create('media-sources-browser', {
             action: self.action,
             body: { provider: value }
           });
-          // Select "Apostrophe" in the dropdown: when coming back, the user can select again what he has just selected
+          // Select "Apostrophe" in the dropdown: when coming back,
+          // the user can select again what he has just selected
           setTimeout(() => (this.selectedIndex = 0), 250);
         }
       });
@@ -36,10 +37,12 @@ apos.define('apostrophe-images-manager-modal', {
   }
 });
 
-apos.define('media-source-browser', {
+apos.define('media-sources-browser', {
   extend: 'apostrophe-modal',
-  source: 'media-source-browser',
+  source: 'media-sources-browser',
   construct: (self, options) => {
+    console.log('=============> HERE <================');
+
     self.results = [];
     self.choices = [];
     self.currentPage = 1;
@@ -242,6 +245,8 @@ apos.define('media-source-browser', {
           connector: self.mediaSourceConnector.name
         };
 
+        console.log('self.mediaSourceConnector.action ===> ', self.mediaSourceConnector.action);
+
         const {
           results,
           total,
@@ -330,7 +335,7 @@ apos.define('media-source-browser', {
           const itemId = $(item).data('media-source-id');
           const data = self.results.find((item) => item.mediaSourceId === itemId);
 
-          apos.create('media-source-browser-editor', {
+          apos.create('media-sources-preview', {
             action: self.action,
             transition: 'slide',
             body: {
@@ -501,10 +506,10 @@ apos.define('media-source-browser', {
   }
 });
 
-apos.define('media-source-browser-editor', {
+apos.define('media-sources-preview', {
   extend: 'apostrophe-modal',
   transition: 'slide',
-  source: 'media-source-browser-editor',
+  source: 'media-sources-preview',
   construct: (self, options) => {
 
   }

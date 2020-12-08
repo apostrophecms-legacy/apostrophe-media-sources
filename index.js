@@ -82,9 +82,9 @@ module.exports = {
         const currentModule = self.apos.modules[connector];
 
         if (self.isMethodExist(currentModule, 'download')) {
-          const data = await currentModule.download(req, files);
+          await currentModule.download(req, files);
 
-          return res.status(200).send(data);
+          return res.status(200).send();
         }
         res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
       } catch (err) {

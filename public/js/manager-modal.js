@@ -4,6 +4,8 @@ apos.define('apostrophe-images-manager-modal', {
   construct: function(self, options) {
     const superAfterRefresh = self.afterRefresh;
 
+    apos.refreshImages = self.refresh;
+
     self.afterRefresh = function (callback) {
       const $mediaSources = self.$el.find('[data-media-sources]');
 
@@ -26,7 +28,10 @@ apos.define('apostrophe-images-manager-modal', {
         if (value.toLowerCase() !== 'apostrophe') {
           apos.create('media-sources-browser', {
             action: self.action,
-            body: { provider: value }
+            body: {
+              provider: value,
+              refresh: self.refresh
+            }
           });
           // Select "Apostrophe" in the dropdown: when coming back,
           // the user can select again what he has just selected
@@ -41,8 +46,6 @@ apos.define('media-sources-browser', {
   extend: 'apostrophe-modal',
   source: 'media-sources-browser',
   construct: (self, options) => {
-    console.log('=============> HERE <================');
-
     self.results = [];
     self.choices = [];
     self.currentPage = 1;
@@ -63,9 +66,30 @@ apos.define('media-sources-browser', {
         .find((connector) => connector.label === self.provider);
 
       self.enableCheckboxEvents();
+      self.enableInputsListeners();
       self.disableOrEnableFilters();
       await self.requestMediaSource(1);
 
+      self.link('apos-import', async function() {
+        apos.ui.globalBusy(true);
+        const files = self.choices.map(choice => self.results
+          .find(result => result.mediaSourceId === choice));
+        const formData = {
+          files,
+          connector: self.mediaSourceConnector.name
+        };
+
+        await apos.utils.post(`${self.mediaSourceConnector.action}/download`, formData);
+
+        apos.refreshImages();
+        apos.ui.globalBusy(false);
+        self.hide();
+      });
+
+      callback();
+    };
+
+    self.enableInputsListeners = () => {
       // Make search when clicking on enter
       self.$filters.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
@@ -86,16 +110,6 @@ apos.define('media-sources-browser', {
 
       self.$el.on('change', 'select[data-media-sources-filter]', function() {
         self.requestMediaSource(1);
-      });
-
-      self.link('apos-import', async function() {
-        const files = self.choices.map(choice => self.results.find(result => result.mediaSourceId === choice));
-        const formData = {
-          files,
-          connector: self.mediaSourceConnector.name
-        };
-
-        await apos.utils.post(`${self.mediaSourceConnector.action}/download`, formData);
       });
 
       self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
@@ -123,8 +137,6 @@ apos.define('media-sources-browser', {
           callNow && func.apply(context, args);
         };
       };
-
-      callback();
     };
 
     self.disableOrEnableFilters = (disable = true, dependency) => {
@@ -152,7 +164,7 @@ apos.define('media-sources-browser', {
       });
     };
 
-    self.enableCheckboxEvents = function() {
+    self.enableCheckboxEvents = () => {
       self.$el.on('change', 'input[type="checkbox"][name="select-all"]', function () {
         const checked = $(this).prop('checked');
         const $pieces = self.$el.find('[data-piece]');
@@ -245,8 +257,6 @@ apos.define('media-sources-browser', {
           connector: self.mediaSourceConnector.name
         };
 
-        console.log('self.mediaSourceConnector.action ===> ', self.mediaSourceConnector.action);
-
         const {
           results,
           total,
@@ -269,7 +279,7 @@ apos.define('media-sources-browser', {
       }
     };
 
-    self.afterShow = function(callback) {
+    self.afterShow = (callback) => {
       if (self.$searchInput) {
         self.$searchInput.focus();
       }
@@ -343,6 +353,8 @@ apos.define('media-sources-browser', {
               provider: self.body.provider
             }
           });
+
+          apos.hideMediaSourcesBrowser = self.hide;
         });
 
       });
@@ -511,6 +523,35 @@ apos.define('media-sources-preview', {
   transition: 'slide',
   source: 'media-sources-preview',
   construct: (self, options) => {
+
+    self.beforeShow = async (callback) => {
+      self.$form = self.$el.find('[data-apos-form]');
+      self.provider = self.$form.attr('data-provider');
+      self.item = JSON.parse(self.$form.attr('data-item'));
+
+      const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
+
+      self.mediaSourceConnector = mediaSourceConnectors
+        .find((connector) => connector.label === self.provider);
+
+      self.link('apos-import', async function() {
+        apos.ui.globalBusy(true);
+
+        const formData = {
+          files: [ self.item ],
+          connector: self.mediaSourceConnector.name
+        };
+
+        await apos.utils.post(`${self.mediaSourceConnector.action}/download`, formData);
+
+        apos.refreshImages();
+        apos.hideMediaSourcesBrowser();
+        apos.ui.globalBusy(false);
+        self.hide();
+      });
+
+      callback();
+    };
 
   }
 });

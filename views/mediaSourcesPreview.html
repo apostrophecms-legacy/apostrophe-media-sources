@@ -24,7 +24,12 @@
 {%- endblock -%}
 
 {%- block body -%}
-  <form class="apos-form" data-apos-form>
+  <form
+    class="apos-form"
+    data-apos-form
+    data-provider="{{data.label}}"
+    data-item="{{item | dump}}"
+    >
   	<div class="apostrophe-image-editor-fields">
       <div class="apos-schema-groups">
         <div class="apos-schema-group apos-active" data-apos-group="basics">

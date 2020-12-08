@@ -16,8 +16,11 @@ apos.define('apostrophe-images-manager-modal', {
 
       const selectClasses = 'class="apos-field-input apos-field-input-select"';
 
-      const $select = `<select name="media-sources" ${
-        selectClasses}><option>Apostrophe</option>${$connectors}</select>`;
+      const $select =
+        `<select name="media-sources" ${selectClasses}>
+          <option>Apostrophe</option>
+          ${$connectors}
+        </select>`;
 
       $mediaSources.append($select);
 

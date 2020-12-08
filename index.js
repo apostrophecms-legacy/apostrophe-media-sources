@@ -3,7 +3,7 @@ module.exports = {
   moogBundle: {
     directory: 'lib/modules',
     modules: [
-      'apostrophe-images-connector-unsplash'
+      'apostrophe-media-sources-unsplash'
     ]
   },
   construct: function(self, options) {
@@ -28,7 +28,7 @@ module.exports = {
       });
     });
 
-    self.route('post', 'media-source-browser', function(req, res) {
+    self.route('post', 'media-sources-browser', function(req, res) {
       const { provider } = req.body;
 
       const mediaSourceConnector = self.connectors
@@ -36,19 +36,19 @@ module.exports = {
 
       const standardFilters = mediaSourceConnector.standardFilters.map((filter) => filter.name);
 
-      return self.renderAndSend(req, 'mediaSourceBrowser', {
+      return self.renderAndSend(req, 'mediaSourcesBrowser', {
         ...mediaSourceConnector,
         standardFilters
       });
     });
 
-    self.route('post', 'media-source-browser-editor', function(req, res) {
+    self.route('post', 'media-sources-preview', function(req, res) {
       const { provider, item } = req.body;
 
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
-      return self.renderAndSend(req, 'mediaSourceBrowserPreview', {
+      return self.renderAndSend(req, 'mediaSourcesPreview', {
         ...mediaSourceConnector,
         item
       });

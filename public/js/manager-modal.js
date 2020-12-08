@@ -41,8 +41,6 @@ apos.define('media-sources-browser', {
   extend: 'apostrophe-modal',
   source: 'media-sources-browser',
   construct: (self, options) => {
-    console.log('=============> HERE <================');
-
     self.results = [];
     self.choices = [];
     self.currentPage = 1;
@@ -233,8 +231,6 @@ apos.define('media-sources-browser', {
           ...self.getFormData(self.$filters),
           page
         };
-
-        console.log('self.mediaSourceConnector.action ===> ', self.mediaSourceConnector.action);
 
         const {
           results,

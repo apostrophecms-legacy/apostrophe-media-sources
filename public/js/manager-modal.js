@@ -1,10 +1,13 @@
 apos.define('apostrophe-images-manager-modal', {
   extend: 'apostrophe-pieces-manager-modal',
 
-  construct: function(self, options) {
+  construct: (self, options) => {
 
     apos.on('refreshImages', (ids) => {
-      self.choices = ids;
+      self.choices = [
+        ...ids,
+        ...self.choices
+      ];
       self.refresh();
     });
 
@@ -27,7 +30,7 @@ apos.define('apostrophe-images-manager-modal', {
     };
 
     const superAfterRefresh = self.afterRefresh;
-    self.afterRefresh = function (callback) {
+    self.afterRefresh = (callback) => {
       const $mediaSources = self.$el.find('[data-media-sources]');
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
@@ -117,7 +120,7 @@ apos.define('media-sources-browser', {
         }
       });
 
-      self.$el.on('change', 'select[data-media-sources-filter]', function() {
+      self.$el.on('change', 'select[data-media-sources-filter]', () => {
         self.requestMediaSource();
       });
 
@@ -131,11 +134,11 @@ apos.define('media-sources-browser', {
 
       function debounce(func, wait, immediate) {
         let timeout;
-        return function() {
+        return () => {
           const context = this;
           const args = arguments;
 
-          const later = function() {
+          const later = () => {
             timeout = null;
             !immediate && func.apply(context, args);
           };
@@ -191,7 +194,7 @@ apos.define('media-sources-browser', {
         self.toggleImportButton();
       });
 
-      self.$el.on('change', '[data-piece] input[type="checkbox"]', function(e) {
+      self.$el.on('change', '[data-piece] input[type="checkbox"]', function() {
         const $box = $(this);
         const id = $box.closest('[data-piece]').attr('data-media-source-id');
 
@@ -221,7 +224,7 @@ apos.define('media-sources-browser', {
             $checkboxesInScope.slice(
               Math.min(startIndex, endIndex),
               Math.max(startIndex, endIndex) + 1
-            ).each(function (i, el) {
+            ).each((i, el) => {
               if (!$(el).prop('checked')) {
                 $(el).prop('checked', true);
                 $(el).trigger('change');

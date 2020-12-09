@@ -1,10 +1,36 @@
 apos.define('apostrophe-images-manager-modal', {
   extend: 'apostrophe-pieces-manager-modal',
 
-  construct: function(self, options) {
-    const superAfterRefresh = self.afterRefresh;
+  construct: (self, options) => {
 
-    self.afterRefresh = function (callback) {
+    apos.on('refreshImages', (ids) => {
+      self.choices = [
+        ...ids,
+        ...self.choices
+      ];
+      self.refresh();
+    });
+
+    const superBeforeShow = self.beforeShow;
+    self.beforeShow = (callback) => {
+      self.$el.on('change', 'select[name="media-sources"]', function() {
+        const { value } = this;
+        if (value.toLowerCase() !== 'apostrophe') {
+          apos.create('media-sources-browser', {
+            action: self.action,
+            body: { provider: value }
+          });
+          // Select "Apostrophe" in the dropdown: when coming back,
+          // the user can select again what he has just selected
+          setTimeout(() => (this.selectedIndex = 0), 250);
+        }
+      });
+
+      superBeforeShow(callback);
+    };
+
+    const superAfterRefresh = self.afterRefresh;
+    self.afterRefresh = (callback) => {
       const $mediaSources = self.$el.find('[data-media-sources]');
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
@@ -23,19 +49,6 @@ apos.define('apostrophe-images-manager-modal', {
       $mediaSources.append($select);
 
       superAfterRefresh(callback);
-
-      self.$el.on('change', 'select[name="media-sources"]', function() {
-        const { value } = this;
-        if (value.toLowerCase() !== 'apostrophe') {
-          apos.create('media-sources-browser', {
-            action: self.action,
-            body: { provider: value }
-          });
-          // Select "Apostrophe" in the dropdown: when coming back,
-          // the user can select again what he has just selected
-          setTimeout(() => (this.selectedIndex = 0), 250);
-        }
-      });
     };
   }
 });
@@ -64,9 +77,31 @@ apos.define('media-sources-browser', {
         .find((connector) => connector.label === self.provider);
 
       self.enableCheckboxEvents();
+      self.enableInputsListeners();
       self.disableOrEnableFilters();
       await self.requestMediaSource(1);
 
+      self.link('apos-import', async () => {
+        apos.ui.globalBusy(true);
+        const files = self.choices.map(choice => self.results
+          .find(result => result.mediaSourceId === choice));
+        const formData = {
+          files,
+          connector: self.mediaSourceConnector.name
+        };
+
+        const imagesIds = await apos.utils
+          .post(`${self.mediaSourceConnector.action}/download`, formData);
+
+        apos.emit('refreshImages', imagesIds);
+        apos.ui.globalBusy(false);
+        self.cancel();
+      });
+
+      callback();
+    };
+
+    self.enableInputsListeners = () => {
       // Make search when clicking on enter
       self.$filters.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
@@ -85,27 +120,9 @@ apos.define('media-sources-browser', {
         }
       });
 
-      self.$el.on('change', 'select[data-media-sources-filter]', function() {
+      self.$el.on('change', 'select[data-media-sources-filter]', () => {
         self.requestMediaSource(1);
       });
-
-      function debounce(func, wait, immediate) {
-        let timeout;
-        return function() {
-          const context = this;
-          const args = arguments;
-
-          const later = function() {
-            timeout = null;
-            !immediate && func.apply(context, args);
-          };
-
-          const callNow = immediate && !timeout;
-          clearTimeout(timeout);
-          timeout = setTimeout(later, wait);
-          callNow && func.apply(context, args);
-        };
-      };
 
       self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
         const hasNoValue = !self.$searchInput.value.length;
@@ -115,7 +132,24 @@ apos.define('media-sources-browser', {
         self.requestMediaSource(1);
       }, 500));
 
-      callback();
+      function debounce(func, wait, immediate) {
+        let timeout;
+        return () => {
+          const context = this;
+          const args = arguments;
+
+          const callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          callNow && func.apply(context, args);
+
+        };
+
+        function later (ctx, args) {
+          timeout = null;
+          !immediate && func.apply(ctx, args);
+        };
+      };
     };
 
     self.disableOrEnableFilters = (disable = true, dependency) => {
@@ -143,7 +177,7 @@ apos.define('media-sources-browser', {
       });
     };
 
-    self.enableCheckboxEvents = function() {
+    self.enableCheckboxEvents = () => {
       self.$el.on('change', 'input[type="checkbox"][name="select-all"]', function () {
         const checked = $(this).prop('checked');
         const $pieces = self.$el.find('[data-piece]');
@@ -157,7 +191,7 @@ apos.define('media-sources-browser', {
         self.toggleImportButton();
       });
 
-      self.$el.on('change', '[data-piece] input[type="checkbox"]', function(e) {
+      self.$el.on('change', '[data-piece] input[type="checkbox"]', function() {
         const $box = $(this);
         const id = $box.closest('[data-piece]').attr('data-media-source-id');
 
@@ -187,7 +221,7 @@ apos.define('media-sources-browser', {
             $checkboxesInScope.slice(
               Math.min(startIndex, endIndex),
               Math.max(startIndex, endIndex) + 1
-            ).each(function (i, el) {
+            ).each((i, el) => {
               $(el).prop('checked', true);
               $(el).trigger('change');
             });
@@ -232,14 +266,15 @@ apos.define('media-sources-browser', {
       try {
         const formData = {
           ...self.getFormData(self.$filters),
-          page
+          page,
+          connector: self.mediaSourceConnector.name
         };
 
         const {
           results,
           total,
           totalPages
-        } = await apos.utils.post(self.mediaSourceConnector.action, formData);
+        } = await apos.utils.post(`${self.mediaSourceConnector.action}/find`, formData);
 
         self.currentPage = page;
         self.totalPages = totalPages;
@@ -257,11 +292,7 @@ apos.define('media-sources-browser', {
       }
     };
 
-    self.link('import', function(e) {
-      // Here do import
-    });
-
-    self.afterShow = function(callback) {
+    self.afterShow = (callback) => {
       if (self.$searchInput) {
         self.$searchInput.focus();
       }
@@ -503,6 +534,34 @@ apos.define('media-sources-preview', {
   transition: 'slide',
   source: 'media-sources-preview',
   construct: (self, options) => {
+    const superBeforeShow = self.beforeShow;
+    self.beforeShow = async (callback) => {
+      self.$form = self.$el.find('[data-apos-form]');
+      self.provider = self.$form.attr('data-provider');
+      self.item = JSON.parse(self.$form.attr('data-item'));
 
+      const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
+
+      self.mediaSourceConnector = mediaSourceConnectors
+        .find((connector) => connector.label === self.provider);
+
+      self.link('apos-import', async () => {
+        apos.ui.globalBusy(true);
+
+        const formData = {
+          files: [ self.item ],
+          connector: self.mediaSourceConnector.name
+        };
+
+        const imagesIds = await apos.utils
+          .post(`${self.mediaSourceConnector.action}/download`, formData);
+
+        apos.emit('refreshImages', imagesIds);
+        apos.ui.globalBusy(false);
+        self.cancel();
+      });
+
+      superBeforeShow(callback());
+    };
   }
 });

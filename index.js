@@ -16,8 +16,9 @@ module.exports = {
             : [
               ...connectors,
               {
+                name: moduleOptions.name,
                 label: moduleOptions.label,
-                action: `${self.action}/find/${moduleOptions.name}`,
+                action: `${self.action}`,
                 ...moduleOptions.mediaSourceConnector
               }
             ];
@@ -54,19 +55,17 @@ module.exports = {
       });
     });
 
-    self.route('post', 'find/:connector', async function(req, res) {
+    self.route('post', 'find', async function(req, res) {
       try {
-        const currentModule = self.apos.modules[req.params.connector];
+        const { connector, ...filters } = req.body;
+        const currentModule = self.apos.modules[connector];
 
-        if (currentModule &&
-          currentModule.find &&
-          typeof currentModule.find === 'function' &&
-          currentModule.options.mediaSourceConnector) {
-          const data = await currentModule.find(req, req.body);
+        if (self.isConnectorWithMethod(currentModule, 'find')) {
+          const data = await currentModule.find(req, filters);
 
           return res.status(200).send(data);
         }
-        res.status(404).send(`Connector not found: ${req.params.connector}`);
+        res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;
@@ -76,5 +75,32 @@ module.exports = {
         res.status(500).send(err);
       }
     });
+
+    self.route('post', 'download', async function(req, res) {
+      try {
+        const { connector, files } = req.body;
+        const currentModule = self.apos.modules[connector];
+
+        if (self.isConnectorWithMethod(currentModule, 'download')) {
+          const data = await currentModule.download(req, files);
+
+          return res.status(200).send(data);
+        }
+        res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
+      } catch (err) {
+        if (err.response) {
+          const { status, data } = err.response;
+          return res.status(status || 500).send(data);
+        }
+
+        res.status(500).send(err);
+      }
+    });
+
+    self.isConnectorWithMethod = (module, method) => {
+      return module && module[method] &&
+        typeof module[method] === 'function' &&
+        module.options.mediaSourceConnector;
+    };
   }
 };

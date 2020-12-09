@@ -60,7 +60,7 @@ module.exports = {
         const { connector, ...filters } = req.body;
         const currentModule = self.apos.modules[connector];
 
-        if (self.isMethodExist(currentModule, 'find')) {
+        if (self.isConnectorWithMethod(currentModule, 'find')) {
           const data = await currentModule.find(req, filters);
 
           return res.status(200).send(data);
@@ -81,7 +81,7 @@ module.exports = {
         const { connector, files } = req.body;
         const currentModule = self.apos.modules[connector];
 
-        if (self.isMethodExist(currentModule, 'download')) {
+        if (self.isConnectorWithMethod(currentModule, 'download')) {
           const data = await currentModule.download(req, files);
 
           return res.status(200).send(data);
@@ -97,7 +97,7 @@ module.exports = {
       }
     });
 
-    self.isMethodExist = (module, method) => {
+    self.isConnectorWithMethod = (module, method) => {
       return module && module[method] &&
         typeof module[method] === 'function' &&
         module.options.mediaSourceConnector;

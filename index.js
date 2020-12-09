@@ -44,14 +44,22 @@ module.exports = {
     });
 
     self.route('post', 'media-sources-preview', function(req, res) {
-      const { provider, item } = req.body;
+      const {
+        provider, item, isImported
+      } = req.body;
 
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
+      console.log('isImported ===> ', require('util').inspect(isImported, {
+        colors: true,
+        depth: 2
+      }));
+
       return self.renderAndSend(req, 'mediaSourcesPreview', {
         ...mediaSourceConnector,
-        item
+        item,
+        isImported
       });
     });
 

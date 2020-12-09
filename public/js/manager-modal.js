@@ -366,6 +366,7 @@ apos.define('media-sources-browser', {
 
         $(button).on('click', () => {
           const itemId = $(item).data('media-source-id');
+          const isImported = $(item).data('imported');
           const data = self.results.find((item) => item.mediaSourceId === itemId);
 
           apos.create('media-sources-preview', {
@@ -373,7 +374,8 @@ apos.define('media-sources-browser', {
             transition: 'slide',
             body: {
               item: data,
-              provider: self.body.provider
+              provider: self.body.provider,
+              isImported: isImported !== undefined
             }
           });
         });
@@ -387,8 +389,7 @@ apos.define('media-sources-browser', {
         <span class="apos-field-input-checkbox-indicator"></span>
       </label>`;
 
-      return `
-      <div class="apos-manage-grid-piece" data-piece data-media-source-id="${
+      return `<div class="apos-manage-grid-piece" data-piece data-media-source-id="${
         item.mediaSourceId}" ${alreadyImported ? 'data-imported' : ''}>
       <div class="apos-manage-grid-image">
         <img src="${item.thumbLink}" alt="image from Unsplash" />

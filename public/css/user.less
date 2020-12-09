@@ -80,8 +80,28 @@
 
         .apos-modal-body {
 
-          .apos-manage-grid-view {
-            overflow: visible;
+          .apos-manage-grid {
+
+            &-view {
+              overflow: visible;
+            }
+
+            &-piece {
+              position: relative;
+              &[data-imported] {
+                &:after {
+                  content: 'Imported';
+                  font-size: 11px;
+                  padding: 0 5px;
+                  border-radius: 8px;
+                  position: absolute;
+                  background-color: @apos-primary;
+                  color: @apos-white;
+                  top: 0;
+                  right: 0;
+                }
+              }
+            }
           }
         }
       }

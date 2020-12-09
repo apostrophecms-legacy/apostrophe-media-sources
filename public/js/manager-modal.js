@@ -530,7 +530,7 @@ apos.define('media-sources-preview', {
   transition: 'slide',
   source: 'media-sources-preview',
   construct: (self, options) => {
-
+    const superBeforeShow = self.beforeShow;
     self.beforeShow = async (callback) => {
       self.$form = self.$el.find('[data-apos-form]');
       self.provider = self.$form.attr('data-provider');
@@ -557,8 +557,7 @@ apos.define('media-sources-preview', {
         self.cancel();
       });
 
-      callback();
+      superBeforeShow(callback());
     };
-
   }
 });

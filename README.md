@@ -23,7 +23,7 @@ To configure this modules, you should add this module and the connectors in the 
   }
 ```
 
-Notice that the `Unsplash` Api require to create a free developper account which will provide you an access key.
+Notice that the `Unsplash` Api require to create a free developer account which will provide you an access key.
 
 Of course you should use an environment variable, to avoid storing key in your source code.
 
@@ -74,14 +74,7 @@ A connector must have two methods declared in its `construct`,
 those will be called by `apostrophe-media-sources` :
 * `self.find` (req, filters):
   This one must get the data from the provider and format it, it has to return
-  ```javascript
-      {
-        images,
-        existingIds
-      };
-  ```
-  ExistingIds, is an array of ids of the already imports images,
-  Images is an array of images which have been formatted this way:
+  Images, this is an array of images which have been formatted this way:
 
   ```javascript
   {

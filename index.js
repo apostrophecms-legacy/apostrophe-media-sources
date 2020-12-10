@@ -64,10 +64,21 @@ module.exports = {
         const currentModule = self.apos.modules[connector];
 
         if (self.isConnectorWithMethod(currentModule, 'find')) {
-          const data = await currentModule.find(req, filters);
+          const images = await currentModule.find(req, filters);
+
+          const existingImages = await self.apos.images.find(req, {
+            mediaSource: connector,
+            mediaSourceId: { $in: images.results.map((img) => img.mediaSourceId) }
+          }).toArray();
+
+          const data = {
+            images,
+            existingIds: existingImages.map((img) => img.mediaSourceId)
+          };
 
           return res.status(200).send(data);
         }
+
         res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
       } catch (err) {
         if (err.response) {

@@ -51,11 +51,6 @@ module.exports = {
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
-      console.log('isImported ===> ', require('util').inspect(isImported, {
-        colors: true,
-        depth: 2
-      }));
-
       return self.renderAndSend(req, 'mediaSourcesPreview', {
         ...mediaSourceConnector,
         item,

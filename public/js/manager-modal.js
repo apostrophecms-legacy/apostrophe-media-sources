@@ -82,6 +82,10 @@ apos.define('media-sources-browser', {
       await self.requestMediaSource();
 
       self.link('apos-import', async () => {
+        if (!self.choices.length) {
+          return;
+        };
+
         apos.ui.globalBusy(true);
         const files = self.choices.map(choice => self.results
           .find(result => result.mediaSourceId === choice));

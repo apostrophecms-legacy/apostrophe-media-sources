@@ -3,7 +3,8 @@ module.exports = {
   moogBundle: {
     directory: 'lib/modules',
     modules: [
-      'apostrophe-media-sources-unsplash'
+      'apostrophe-media-sources-unsplash',
+      'apostrophe-media-sources-wedia',
     ]
   },
   construct: function(self, options) {

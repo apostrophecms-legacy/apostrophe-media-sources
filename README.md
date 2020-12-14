@@ -25,13 +25,13 @@ To configure this modules, you should add this module and the connectors in the 
 
 Notice that the `Unsplash` Api require to create a free developer account which will provide you an access key.
 
-Of course you should use an environment variable, to avoid storing key in your source code.
+Alternatively you may use an environment variable, to avoid storing keys in your source code.
 
-## Create you own connector
+## Create your own connector
 
-What we call a connector is a module which connect the `apostrophe-media-sources` to a specific provider.
+What we call a connector is a module which connects the apostrophe image library to a specific provider.
 
-Each module must have a `mediaSourceConnector` config in options :
+Each module must have a `mediaSourceConnector` option :
 ```javascript
     self.options.mediaSourceConnector = {
       standardFilters: [ // Should work for every provider

@@ -285,7 +285,8 @@ apos.define('media-sources-browser', {
             total,
             totalPages
           },
-          existingIds
+          existingIds,
+          filterChoices
         } = await apos.utils.post(`${self.mediaSourceConnector.action}/find`, formData);
 
         self.currentPage = page;
@@ -299,9 +300,28 @@ apos.define('media-sources-browser', {
           total: totalPages
         });
 
+        self.updateFiltersChoices(filterChoices);
+
       } catch (err) {
         // TODO Show error to user
       }
+    };
+
+    self.updateFiltersChoices = (choices) => {
+      const $selectFilters = self.$filters.find('select');
+
+      $selectFilters.each((i, item) => {
+        const $item = $(item);
+
+        const itemChoices = choices[item.name];
+
+        const selectOptions = itemChoices.reduce((acc, choice) => {
+          return `${acc}<option value=${choice.value}>${choice.label}</option>`;
+        }, '');
+
+        $item.empty();
+        $item.append(selectOptions);
+      });
     };
 
     self.afterShow = (callback) => {

@@ -308,19 +308,33 @@ apos.define('media-sources-browser', {
     };
 
     self.updateFiltersChoices = (choices) => {
-      const $selectFilters = self.$filters.find('select');
+      const $selectFilters = self.$filters.find('select.apos-field-input');
 
       $selectFilters.each((i, item) => {
         const $item = $(item);
-
         const itemChoices = choices[item.name];
 
-        const selectOptions = itemChoices.reduce((acc, choice) => {
-          return `${acc}<option value=${choice.value}>${choice.label}</option>`;
-        }, '');
+        const { selectOptions, value } = itemChoices.reduce((acc, choice) => {
+          const selectOptions = `${acc.selectOptions}<option value=${choice.value}>${choice.label}</option>`;
+
+          // If previous choice already exist we keep it set
+          return choice.value === $item.val()
+            ? {
+              value: choice.value,
+              selectOptions
+            }
+            : {
+              ...acc,
+              selectOptions
+            };
+        }, {
+          selectOptions: '',
+          value: ''
+        });
 
         $item.empty();
         $item.append(selectOptions);
+        $item.val(value);
       });
     };
 

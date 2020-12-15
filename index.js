@@ -142,7 +142,7 @@ module.exports = {
       const tempPath = self.apos.attachments.uploadfs.getTempPath();
 
       for (const file of files) {
-        const fileName = await connectorModule.download(file, tempPath);
+        const fileName = await connectorModule.download(req, file, tempPath);
 
         const filePath = `${tempPath}/${fileName}`;
 
@@ -181,7 +181,7 @@ module.exports = {
 
       const piece = {
         title,
-        slug: `${slugPrefix}${title}`,
+        slug: `${slugPrefix || ''}${file.mediaSourceId}`,
         published: true,
         trash: false,
         attachment,

@@ -34,7 +34,7 @@ What we call a connector is a module which connects the apostrophe image library
 Each module must have a `mediaSourceConnector` option :
 ```javascript
     self.options.mediaSourceConnector = {
-      standardFilters: [ // Should work for every provider
+      standardFilters: [ // There are all the standard filters for now
         {
           name: 'orientation',
           // We add a dependencies options, because for some providers,
@@ -73,31 +73,35 @@ Each module must have a `mediaSourceConnector` option :
 A connector must have two methods declared in its `construct`,
 those will be called by `apostrophe-media-sources` :
 * `self.find` (req, filters):
+  You get gere the filters selected by the user.
   This one must get the data from the provider and format it, it has to return
   Images, this is an array of images which have been formatted this way:
 
   ```javascript
   {
-      mediaSourceId, // The image ID of the provider
+      mediaSourceId, // The image ID from the provider
       title,
       description,
-      width,
-      height,
+      width, // Number
+      height, // Number
       thumbLink, // For listing
       previewLink, // For preview button
       likes, // Number
       tags, // Array of strings
       categories,
-      downloadLink,
+      downloadLink, // Download Url
       createdAt
   }
   ```
 
-* `self.download` (req, files):
-This method will download the photo in a temp folder,
-create apostrophe `attachment` and `image` pieces.
-Finally it has to return the ids of the created images pieces.
+* `self.download` (req, file, tempPath):
+The file param, is the one you already formatted in the `find` method (see just above)
+Don't worry about multiple files import, we handle this part.
+We provide the `tempPath` which is the path to the temp folder where to download the image.
+You simply have to import your image in this folder and to return the image name (with extension).
+We take care of the attachment and image piece creation, as well as to delete temporary images.
 
-Last important thing, you have to store in your piece the `mediaSourceId`
-which is the id from the provider, it allows us to know if an image has already been imported.
-And the `mediaSource` property, which is the name of the module, for Unsplash (`apostrophe-media-sources-unsplash`).
+* `self.choices` (req, filters)
+This method should return the available choices depending on the already selected filters.
+Can be static if there are no filters dependencies for a provider.
+This method is executed during every search.

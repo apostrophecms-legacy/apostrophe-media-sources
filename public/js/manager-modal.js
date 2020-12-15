@@ -142,15 +142,16 @@ apos.define('media-sources-browser', {
           const context = this;
           const args = arguments;
 
-          const later = () => {
-            timeout = null;
-            !immediate && func.apply(context, args);
-          };
-
           const callNow = immediate && !timeout;
           clearTimeout(timeout);
           timeout = setTimeout(later, wait);
           callNow && func.apply(context, args);
+
+        };
+
+        function later (ctx, args) {
+          timeout = null;
+          !immediate && func.apply(ctx, args);
         };
       };
     };

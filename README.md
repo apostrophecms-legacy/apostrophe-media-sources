@@ -34,7 +34,7 @@ What we call a connector is a module which connects the apostrophe image library
 Each module must have a `mediaSourceConnector` option :
 ```javascript
     self.options.mediaSourceConnector = {
-      standardFilters: [ // There are all the standard filters for now
+      standardFilters: [
         {
           name: 'orientation',
           // We add a dependencies options, because for some providers,
@@ -50,16 +50,6 @@ Each module must have a `mediaSourceConnector` option :
           name: 'color',
           label: 'Color',
           type: 'select',
-          choices: [
-            {
-              label: 'All',
-              value: ''
-            },
-            {
-              label: 'Black And White',
-              value: 'black_and_white'
-            },
-          ]
         }
       ],
       propertyLabels: { // You can modify the labels of the preview form
@@ -69,6 +59,10 @@ Each module must have a `mediaSourceConnector` option :
       perPage: 20 // Results per page
     };
 ```
+
+Here are all the standard filters handled by `apostrophe-media-sources`:
+* Search
+* Orientation (Notice that your `choices` method should return some for this filter)
 
 A connector must have two methods declared in its `construct`,
 those will be called by `apostrophe-media-sources` :

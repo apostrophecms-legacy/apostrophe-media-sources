@@ -11,11 +11,19 @@
 {%- block controls -%}
   <div class="apos-modal-controls">
     {{ buttons.minor('Finished', { action: 'cancel' }) }}
-    {{ buttons.base('Import', {
-        action: 'import',
-        attributes: 'data-apos-import'
-        }, 'apos-button--major')
-    }}
+    {% if data.isImported %}
+      {{ buttons.base('Import', {
+          action: '',
+          attributes: ''
+          }, 'apos-button--major apos-button--disabled')
+      }}
+    {% else %}
+      {{ buttons.base('Import', {
+          action: 'import',
+          attributes: 'data-apos-import'
+          }, 'apos-button--major')
+      }}
+    {% endif %}
   </div>
 {%- endblock -%}
 

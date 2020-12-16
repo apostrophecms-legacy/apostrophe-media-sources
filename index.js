@@ -1,3 +1,6 @@
+const fs = require('fs');
+const unlink = require('util').promisify(fs.unlink);
+
 module.exports = {
   improve: 'apostrophe-images',
   moogBundle: {
@@ -35,23 +38,35 @@ module.exports = {
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
-      const standardFilters = mediaSourceConnector.standardFilters.map((filter) => filter.name);
+      const choices = self.apos.modules[mediaSourceConnector.name].choices();
+
+      const standardFilters = mediaSourceConnector.standardFilters
+        .reduce((acc, filter) => {
+          return {
+            ...acc,
+            [filter.name]: filter
+          };
+        }, {});
 
       return self.renderAndSend(req, 'mediaSourcesBrowser', {
         ...mediaSourceConnector,
-        standardFilters
+        standardFilters,
+        choices
       });
     });
 
     self.route('post', 'media-sources-preview', function(req, res) {
-      const { provider, item } = req.body;
+      const {
+        provider, item, isImported
+      } = req.body;
 
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
       return self.renderAndSend(req, 'mediaSourcesPreview', {
         ...mediaSourceConnector,
-        item
+        item,
+        isImported
       });
     });
 
@@ -61,10 +76,22 @@ module.exports = {
         const currentModule = self.apos.modules[connector];
 
         if (self.isConnectorWithMethod(currentModule, 'find')) {
-          const data = await currentModule.find(req, filters);
+          const images = await currentModule.find(req, filters);
+
+          const existingImages = await self.apos.images.find(req, {
+            mediaSource: connector,
+            mediaSourceId: { $in: images.results.map((img) => img.mediaSourceId) }
+          }).toArray();
+
+          const data = {
+            images,
+            existingIds: existingImages.map((img) => img.mediaSourceId),
+            filterChoices: currentModule.choices(req, filters)
+          };
 
           return res.status(200).send(data);
         }
+
         res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
       } catch (err) {
         if (err.response) {
@@ -81,12 +108,17 @@ module.exports = {
         const { connector, files } = req.body;
         const currentModule = self.apos.modules[connector];
 
-        if (self.isConnectorWithMethod(currentModule, 'download')) {
-          const data = await currentModule.download(req, files);
-
-          return res.status(200).send(data);
+        if (!currentModule) {
+          return res.status(400).send(`This module doesn't exist: ${connector}.`);
         }
-        res.status(404).send(`Connector ${connector} doesn't exist or doesn't have the right methods`);
+
+        const data = await self.downloadAndInsert(req, files, currentModule);
+
+        if (!data) {
+          throw new Error(`Error while downloading image for ${connector}.`);
+        }
+
+        return res.status(200).send(data);
       } catch (err) {
         if (err.response) {
           const { status, data } = err.response;
@@ -101,6 +133,71 @@ module.exports = {
       return module && module[method] &&
         typeof module[method] === 'function' &&
         module.options.mediaSourceConnector;
+    };
+
+    self.downloadAndInsert = async (req, files, connectorModule) => {
+      const imagesIds = [];
+      const tempPaths = [];
+
+      const tempPath = self.apos.attachments.uploadfs.getTempPath();
+
+      for (const file of files) {
+        const fileName = await connectorModule.download(req, file, tempPath);
+
+        const filePath = `${tempPath}/${fileName}`;
+
+        const image = await self.insertImage({
+          req,
+          connectorName: connectorModule.options.name,
+          file,
+          fileName,
+          filePath
+        });
+
+        tempPaths.push(filePath);
+        imagesIds.push(image._id);
+      }
+
+      self.unlinkImages(tempPaths);
+
+      return imagesIds;
+    };
+
+    self.insertImage = async ({
+      req,
+      connectorName,
+      file,
+      fileName,
+      filePath
+    }) => {
+      const { slugPrefix } = self.apos.modules['apostrophe-images'].options;
+
+      const attachment = await self.apos.attachments.insert(req, {
+        name: fileName,
+        path: filePath
+      });
+
+      const title = file.title || file.mediaSourceId;
+
+      const piece = {
+        title,
+        slug: `${slugPrefix || ''}${file.mediaSourceId}`,
+        published: true,
+        trash: false,
+        attachment,
+        mediaSourceId: file.mediaSourceId,
+        mediaSource: connectorName
+      };
+
+      return self.apos.images.insert(req, piece);
+    };
+
+    self.unlinkImages = (tempPaths) => {
+      const promises = tempPaths.map((tempPath) => {
+        return unlink(tempPath);
+      });
+
+      return Promise.all(promises);
     };
   }
 };

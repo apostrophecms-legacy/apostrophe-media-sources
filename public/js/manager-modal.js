@@ -41,7 +41,7 @@ apos.define('apostrophe-images-manager-modal', {
         let dataAttr = '';
         if (connector.script) {
           const jsonReplacer = (key, val) => typeof val === 'function' ? val.toString() : val;
-          console.log('connector.script.params ====> ', connector.script.params)
+          console.log('connector.script.params ====> ', connector.script.params);
           // console.log('JSON.stringify(connector.script.params) ====> ', JSON.stringify(connector.script.params, jsonReplacer))
           dataAttr = `
             data-script-src="${connector.script.src}"
@@ -85,12 +85,12 @@ apos.define('media-sources-browser', {
       if (options.body.scriptSrc && !window.WediaContentPicker) {
         const jsScript = document.createElement('script');
         jsScript.src = options.body.scriptSrc;
-        document.body.appendChild(jsScript)
+        document.body.appendChild(jsScript);
 
         jsScript.addEventListener('load', () => {
           const [ domElement ] = self.$el.find('[data-script-element]'); // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
           apos.emit('wediaPicker', { domElement });
-        })
+        });
       }
 
       self.$manageView = self.$el.find('[data-apos-manage-view]');

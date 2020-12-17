@@ -76,16 +76,20 @@ apos.define('media-sources-browser', {
     self.resizeContentHeight = () => {};
 
     self.beforeShow = async (callback) => {
-
-      console.log('options.body ===> ', options.body);
       if (options.body.scriptSrc && !window.WediaContentPicker) {
         const jsScript = document.createElement('script');
         jsScript.src = options.body.scriptSrc;
         document.body.appendChild(jsScript);
 
         jsScript.addEventListener('load', () => {
-          const [ domElement ] = self.$el.find('[data-script-element]'); // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
-          apos.emit('wediaPicker', { domElement, server: options.body.scriptServer });
+          // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
+          const [ domElement ] = self.$el.find('[data-script-element]');
+
+          const { mediaSourceConnector } = self;
+          apos.emit('wediaPicker', {
+            domElement,
+            mediaSourceConnector
+          });
         });
       }
 

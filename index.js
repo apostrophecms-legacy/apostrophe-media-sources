@@ -26,7 +26,8 @@ module.exports = {
         }, []);
 
       self.on('apostrophe-pages:beforeSend', 'sendConnectorsToBrowser', (req) => {
-        req.browserCall('apos.mediaSourceConnectors=?', JSON.stringify(self.connectors));
+        const jsonReplacer = (key, val) => typeof val === 'function' ? val.toString() : val;
+        req.browserCall('apos.mediaSourceConnectors=?', JSON.stringify(self.connectors, jsonReplacer));
       });
     });
 
@@ -36,7 +37,7 @@ module.exports = {
       const mediaSourceConnector = self.connectors
         .find((connector) => connector.label === provider);
 
-      const standardFilters = mediaSourceConnector.standardFilters.map((filter) => filter.name);
+      const standardFilters = (mediaSourceConnector.standardFilters || []).map((filter) => filter.name);
 
       return self.renderAndSend(req, 'mediaSourcesBrowser', {
         ...mediaSourceConnector,

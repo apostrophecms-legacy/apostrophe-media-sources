@@ -2,7 +2,6 @@
 {% import 'apostrophe-ui:components/buttons.html' as buttons %}
 {% import 'apostrophe-ui:components/fields.html' as fields with context %}
 
-
 {% block label %}<span data-provider="{{ data.label }}">{{ data.label }}</span> {{ __ns('apostrophe', 'Images') }}{% endblock %}
 
 {% block controls %}
@@ -17,7 +16,7 @@
 {% endblock %}
 
 {% block filters %}
-  {% if data.name !== 'apostrophe-media-sources-wedia' %}
+  {% if data.standardFilters.length or data.customFilters.length %}
     <div
       class="apos-clearfix apos-modal-filters-inner"
       data-filters>
@@ -109,9 +108,8 @@
 
 {# Populated with Ajax when searching for images #}
 {% block body %}
-  {% if data.name === 'apostrophe-media-sources-wedia' %}
-    <script src="https://michelin-pp.wedia-group.com/asset-picker/wedia-content-picker.js"></script>
-    <div class="apos-modal-no-filters" data-wedia-element></div>
+  {% if data.script %}
+    <div class="apos-modal-script" data-script-element></div>
   {% else %}
     <div class="apos-manage-view">
       <div class="apos-manage-grid-view">
@@ -126,7 +124,7 @@
 
 {# Populated with Ajax when searching for images #}
 {% block footer %}
-  {% if data.name !== 'apostrophe-media-sources-wedia' %}
+  {% if not data.script %}
     <div class="apos-modal-footer-inner">
       <div class="apos-ui">
         <div class="apos-pager" data-media-sources-pager></div>

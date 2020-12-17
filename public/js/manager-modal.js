@@ -39,11 +39,17 @@ apos.define('apostrophe-images-manager-modal', {
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
       const $connectors = mediaSourceConnectors.reduce((acc, connector) => {
         let dataAttr = '';
-        if (!connector.standardFilters && !connector.customFilters) {
-          dataAttr = 'data-connector-no-filters';
-        }
         if (connector.script) {
-          dataAttr += ` data-script="${connector.script}"`;
+          const jsonReplacer = (key, val) => typeof val === 'function' ? val.toString() : val;
+          console.log('connector.script.params ====> ', connector.script.params)
+          // console.log('JSON.stringify(connector.script.params) ====> ', JSON.stringify(connector.script.params, jsonReplacer))
+          dataAttr = `
+            data-script-src="${connector.script.src}"
+            data-script-name="${connector.script.name}"
+            data-script-handler="${connector.script.handler}"
+            data-script-dom-element-name="${connector.script.domElementName}"
+            data-script-params="${encodeURIComponent(JSON.stringify(connector.script.params, jsonReplacer))}"
+          `;
         }
 
         return `${acc}<option ${dataAttr}>${connector.label}</option>`;
@@ -68,18 +74,6 @@ apos.define('media-sources-browser', {
   extend: 'apostrophe-modal',
   source: 'media-sources-browser',
   construct: (self, options) => {
-    console.log('options ====> ', options)
-    setTimeout(() => {
-      const el = self.$el.find('[data-wedia-element]')[0];
-      window.WediaContentPicker.attach({
-        el,
-        server: 'https://michelin-pp.wedia-group.com',
-        onPick: function (assets) {
-          console.log('assets ====> ', assets)
-        }
-      });
-    }, 1000);
-
     self.results = [];
     self.choices = [];
     self.currentPage = 1;
@@ -88,6 +82,17 @@ apos.define('media-sources-browser', {
     self.resizeContentHeight = () => {};
 
     self.beforeShow = async (callback) => {
+      if (options.body.scriptSrc && !window.WediaContentPicker) {
+        const jsScript = document.createElement('script');
+        jsScript.src = options.body.scriptSrc;
+        document.body.appendChild(jsScript)
+
+        jsScript.addEventListener('load', () => {
+          const [ domElement ] = self.$el.find('[data-script-element]'); // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
+          apos.emit('wediaPicker', { domElement });
+        })
+      }
+
       self.$manageView = self.$el.find('[data-apos-manage-view]');
       self.$filters = self.$modalFilters.find('[data-filters]');
       self.$items = self.$el.find('[data-items]');

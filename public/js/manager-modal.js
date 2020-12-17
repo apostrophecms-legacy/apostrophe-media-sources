@@ -40,16 +40,10 @@ apos.define('apostrophe-images-manager-modal', {
       const $connectors = mediaSourceConnectors.reduce((acc, connector) => {
         let dataAttr = '';
         if (connector.script) {
-          const jsonReplacer = (key, val) => typeof val === 'function' ? val.toString() : val;
-          console.log('connector.script.params ====> ', connector.script.params);
-          // console.log('JSON.stringify(connector.script.params) ====> ', JSON.stringify(connector.script.params, jsonReplacer))
-          dataAttr = `
-            data-script-src="${connector.script.src}"
-            data-script-name="${connector.script.name}"
-            data-script-handler="${connector.script.handler}"
-            data-script-dom-element-name="${connector.script.domElementName}"
-            data-script-params="${encodeURIComponent(JSON.stringify(connector.script.params, jsonReplacer))}"
-          `;
+          // const jsonReplacer = (key, val) => typeof val === 'function' ? val.toString() : val;
+          // console.log('connector.script ====> ', connector.script);
+          // console.log('JSON.stringify(connector.script.params) ====> ', encodeURIComponent(JSON.stringify(connector.script.params, jsonReplacer)))
+          dataAttr = `data-script="${JSON.stringify(connector.script)}"`;
         }
 
         return `${acc}<option ${dataAttr}>${connector.label}</option>`;
@@ -89,11 +83,9 @@ apos.define('media-sources-browser', {
         jsScript.src = options.body.scriptSrc;
         document.body.appendChild(jsScript);
 
-        console.log('options.body ===> ', options.body);
-
         jsScript.addEventListener('load', () => {
           const [ domElement ] = self.$el.find('[data-script-element]'); // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
-          apos.emit('wediaPicker', { domElement });
+          apos.emit('wediaPicker', { domElement, server: options.body.scriptServer });
         });
       }
 

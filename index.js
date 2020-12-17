@@ -50,6 +50,11 @@ module.exports = {
           };
         }, {});
 
+      console.log('mediaSourceConnector ===> ', require('util').inspect(mediaSourceConnector, {
+        colors: true,
+        depth: 2
+      }));
+
       return self.renderAndSend(req, 'mediaSourcesBrowser', {
         ...mediaSourceConnector,
         standardFilters,

@@ -14,11 +14,14 @@ apos.define('apostrophe-images-manager-modal', {
     const superBeforeShow = self.beforeShow;
     self.beforeShow = (callback) => {
       self.$el.on('change', 'select[name="media-sources"]', function() {
-        const { value } = this;
+        const { value, selectedIndex } = this;
         if (value.toLowerCase() !== 'apostrophe') {
           apos.create('media-sources-browser', {
             action: self.action,
-            body: { provider: value }
+            body: {
+              provider: value,
+              ...this[selectedIndex].dataset // pass data attributes from the option selected
+            }
           });
           // Select "Apostrophe" in the dropdown: when coming back,
           // the user can select again what he has just selected
@@ -35,7 +38,15 @@ apos.define('apostrophe-images-manager-modal', {
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
       const $connectors = mediaSourceConnectors.reduce((acc, connector) => {
-        return `${acc}<option>${connector.label}</option>`;
+        let dataAttr = '';
+        if (!connector.standardFilters && !connector.customFilters) {
+          dataAttr = 'data-connector-no-filters';
+        }
+        if (connector.script) {
+          dataAttr += ` data-script="${connector.script}"`;
+        }
+
+        return `${acc}<option ${dataAttr}>${connector.label}</option>`;
       }, '');
 
       const selectClasses = 'class="apos-field-input apos-field-input-select"';
@@ -57,6 +68,18 @@ apos.define('media-sources-browser', {
   extend: 'apostrophe-modal',
   source: 'media-sources-browser',
   construct: (self, options) => {
+    console.log('options ====> ', options)
+    setTimeout(() => {
+      const el = self.$el.find('[data-wedia-element]')[0];
+      window.WediaContentPicker.attach({
+        el,
+        server: 'https://michelin-pp.wedia-group.com',
+        onPick: function (assets) {
+          console.log('assets ====> ', assets)
+        }
+      });
+    }, 1000);
+
     self.results = [];
     self.choices = [];
     self.currentPage = 1;
@@ -69,12 +92,12 @@ apos.define('media-sources-browser', {
       self.$filters = self.$modalFilters.find('[data-filters]');
       self.$items = self.$el.find('[data-items]');
       self.$searchInput = self.$el.find('.apos-modal-filters-search [data-media-sources-filter]')[0];
-      self.provider = self.$filters.attr('data-provider');
+      self.provider = self.$el.find('[data-provider]')[0].innerHTML;
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
 
       self.mediaSourceConnector = mediaSourceConnectors
-        .find((connector) => connector.label === self.provider);
+        .find(connector => connector.label === self.provider);
 
       self.enableCheckboxEvents();
       self.enableInputsListeners();
@@ -153,10 +176,9 @@ apos.define('media-sources-browser', {
     };
 
     self.disableOrEnableFilters = (disable = true, dependency) => {
-      const allFilters = [
-        ...self.mediaSourceConnector.standardFilters,
-        ...self.mediaSourceConnector.customFilters
-      ];
+      const allFilters = [];
+      self.mediaSourceConnector.standardFilters && allFilters.push(self.mediaSourceConnector.standardFilters);
+      self.mediaSourceConnector.customFilters && allFilters.push(self.mediaSourceConnector.customFilters);
 
       allFilters.forEach((filter) => {
         if (filter.dependsOn) {

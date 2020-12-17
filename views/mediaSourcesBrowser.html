@@ -19,7 +19,8 @@
   {% if data.standardFilters.length or data.customFilters.length %}
     <div
       class="apos-clearfix apos-modal-filters-inner"
-      data-filters>
+      data-filters
+      data-provider="{{data.label}}">
       <div class="apos-modal-filters-toggles">
         <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--left">
           <div class="apos-modal-filter">
@@ -29,66 +30,51 @@
             </div>
           </div>
 
-          {% if 'orientation' in data.standardFilters %}
+          {% if data.standardFilters['orientation'] %}
+            {% set filter = data.standardFilters['orientation'] %}
+            {% set choices = data.choices[filter.name] %}
+
             <div class="apos-modal-filter">
-              <label>{{ __ns('apostrophe', 'Orientation') }}</label>
+              <label>{{ __ns('apostrophe', filter.label) }}</label>
               <div class="apos-field-input-select-wrapper">
                 <select
-                  name="orientation"
+                  name="{{filter.name}}"
                   class="apos-field-input apos-field-input-select"
                   data-media-sources-filter
                 >
-                  <option value="">{{ __ns('apostrophe', 'All') }}</option>
-                  <option value="landscape">{{ __ns('apostrophe', 'Landscape') }}</option>
-                  <option value="portrait">{{ __ns('apostrophe', 'Portrait') }}</option>
-                  <option value="square">{{ __ns('apostrophe', 'Square') }}</option>
+                  {% for choice in choices %}
+                    <option value="{{ choice.value }}">{{ __ns('apostrophe', choice.label) }}</option>
+                  {% endfor %}
                 </select>
               </div>
             </div>
           {% endif %}
 
           {% for filter in data.customFilters %}
+            {% set choices = data.choices[filter.name] %}
+
             <div class="apos-modal-filter">
               <label>{{ __ns('apostrophe', filter.label) }}</label>
               {% if filter.type === 'select' %}
                 <div class="apos-field-input-select-wrapper">
                   <select
-                    name="{{ filter.name }}"
+                    name="orientation"
                     class="apos-field-input apos-field-input-select"
                     data-media-sources-filter
                   >
-                    {% for choice in filter.choices %}
+                    {% for choice in choices %}
                       <option value="{{ choice.value }}">{{ __ns('apostrophe', choice.label) }}</option>
                     {% endfor %}
                   </select>
                 </div>
-              {% else %}
-                <div class="apos-field-group">
-                  <input
-                    name="{{ filter.name }}"
-                    class="apos-field-input apos-field-input-text"
-                    type="{{ filter.inputType or 'text' }}"
-                    {% if filter.inputType === 'number' -%} min="0" {%- endif %}
-                    data-media-sources-filter
-                  />
-                  {% if filter.range %}
-                    <div class="apos-field-input-select-wrapper">
-                      <select
-                        class="apos-field-input apos-field-input-select"
-                        data-media-sources-{{ filter.name }}-range
-                      >
-                        <option>{{ __ns('apostrophe', 'Min') }}</option>
-                        <option>{{ __ns('apostrophe', 'Max') }}</option>
-                      </select>
-                    </div>
-                  {% endif %}
-                </div>
               {% endif %}
             </div>
           {% endfor %}
+
         </div>
 
-        {% if 'search' in data.standardFilters %}
+        {% if data.standardFilters['search'] %}
+          {% set filter = data.standardFilters['search'] %}
           <div class="apos-modal-filters-wrapper apos-modal-filters-wrapper--right">
             <div class="apos-modal-filters-search">
               <input
@@ -101,7 +87,6 @@
             </div>
           </div>
         {% endif %}
-      </div>
     </div>
   {% endif %}
 {% endblock %}

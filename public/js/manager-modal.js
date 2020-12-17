@@ -105,11 +105,15 @@ apos.define('media-sources-browser', {
         .find(connector => connector.label === self.provider);
 
       self.enableCheckboxEvents();
-      self.enableInputsListeners();
+      self.enableInputsEvents();
       self.disableOrEnableFilters();
-      await self.requestMediaSource(1);
+      await self.requestMediaSource();
 
       self.link('apos-import', async () => {
+        if (!self.choices.length) {
+          return;
+        };
+
         apos.ui.globalBusy(true);
         const files = self.choices.map(choice => self.results
           .find(result => result.mediaSourceId === choice));
@@ -129,11 +133,11 @@ apos.define('media-sources-browser', {
       callback();
     };
 
-    self.enableInputsListeners = () => {
+    self.enableInputsEvents = () => {
       // Make search when clicking on enter
       self.$filters.keypress(({ originalEvent }) => {
         if (originalEvent.charCode === 13) {
-          self.requestMediaSource(1);
+          self.requestMediaSource();
         }
       });
 
@@ -149,7 +153,7 @@ apos.define('media-sources-browser', {
       });
 
       self.$el.on('change', 'select[data-media-sources-filter]', () => {
-        self.requestMediaSource(1);
+        self.requestMediaSource();
       });
 
       self.$el.on('input', 'input[data-media-sources-filter]', debounce(function() {
@@ -157,7 +161,7 @@ apos.define('media-sources-browser', {
 
         self.disableOrEnableFilters(hasNoValue, 'search');
 
-        self.requestMediaSource(1);
+        self.requestMediaSource();
       }, 500));
 
       function debounce(func, wait, immediate) {
@@ -210,10 +214,14 @@ apos.define('media-sources-browser', {
         const $pieces = self.$el.find('[data-piece]');
 
         $pieces.each(function() {
-          const id = $(this).attr('data-media-source-id');
+          const isImported = $(this).data('imported');
 
-          $(this).find('input[type="checkbox"]').prop('checked', checked);
-          self.addOrRemoveChoice(id, !checked);
+          if (isImported === undefined) {
+            const id = $(this).attr('data-media-source-id');
+
+            $(this).find('input[type="checkbox"]').prop('checked', checked);
+            self.addOrRemoveChoice(id, !checked);
+          }
         });
         self.toggleImportButton();
       });
@@ -249,8 +257,10 @@ apos.define('media-sources-browser', {
               Math.min(startIndex, endIndex),
               Math.max(startIndex, endIndex) + 1
             ).each((i, el) => {
-              $(el).prop('checked', true);
-              $(el).trigger('change');
+              if (!$(el).prop('checked')) {
+                $(el).prop('checked', true);
+                $(el).trigger('change');
+              }
             });
           } else {
             const $pieces = self.$el.find('[data-piece]');
@@ -298,9 +308,13 @@ apos.define('media-sources-browser', {
         };
 
         const {
-          results,
-          total,
-          totalPages
+          images: {
+            results,
+            total,
+            totalPages
+          },
+          existingIds,
+          filterChoices
         } = await apos.utils.post(`${self.mediaSourceConnector.action}/find`, formData);
 
         self.currentPage = page;
@@ -308,15 +322,48 @@ apos.define('media-sources-browser', {
         self.results = results;
 
         self.injectResultsLabel(results.length, total, page);
-        self.injectResultsList(results);
+        self.injectResultsList(results, existingIds);
         self.injectResultsPager({
           current: page,
           total: totalPages
         });
 
+        self.updateFiltersChoices(filterChoices);
+
       } catch (err) {
         // TODO Show error to user
       }
+    };
+
+    self.updateFiltersChoices = (choices) => {
+      const $selectFilters = self.$filters.find('select.apos-field-input');
+
+      $selectFilters.each((i, item) => {
+        const $item = $(item);
+        const itemChoices = choices[item.name];
+
+        const { selectOptions, value } = itemChoices.reduce((acc, choice) => {
+          const selectOptions = `${acc.selectOptions}<option value=${choice.value}>${choice.label}</option>`;
+
+          // If previous choice already exist we keep it set
+          return choice.value === $item.val()
+            ? {
+              value: choice.value,
+              selectOptions
+            }
+            : {
+              ...acc,
+              selectOptions
+            };
+        }, {
+          selectOptions: '',
+          value: ''
+        });
+
+        $item.empty();
+        $item.append(selectOptions);
+        $item.val(value);
+      });
     };
 
     self.afterShow = (callback) => {
@@ -365,11 +412,13 @@ apos.define('media-sources-browser', {
       $resultsLabel.append(`Showing ${start} - ${end} of ${total}${limitedResultsMsg}`);
     };
 
-    self.injectResultsList = (results) => {
+    self.injectResultsList = (results, existingIds) => {
       const htmlToInject = results.reduce((acc, item) => {
+        const alreadyImported = existingIds.includes(item.mediaSourceId);
+
         return `
           ${acc}
-          ${self.getHtmlListItem(item)}
+          ${self.getHtmlListItem(item, alreadyImported)}
         `;
       }, '');
 
@@ -383,6 +432,7 @@ apos.define('media-sources-browser', {
 
         $(button).on('click', () => {
           const itemId = $(item).data('media-source-id');
+          const isImported = $(item).data('imported');
           const data = self.results.find((item) => item.mediaSourceId === itemId);
 
           apos.create('media-sources-preview', {
@@ -390,7 +440,8 @@ apos.define('media-sources-browser', {
             transition: 'slide',
             body: {
               item: data,
-              provider: self.body.provider
+              provider: self.body.provider,
+              isImported: isImported !== undefined
             }
           });
         });
@@ -398,9 +449,14 @@ apos.define('media-sources-browser', {
       });
     };
 
-    self.getHtmlListItem = (item) => {
-      return `
-      <div class="apos-manage-grid-piece" data-piece data-media-source-id="${item.mediaSourceId}">
+    self.getHtmlListItem = (item, alreadyImported) => {
+      const checkbox = `<label>
+        <input type="checkbox" class="apos-field-input apos-field-input-checkbox" />
+        <span class="apos-field-input-checkbox-indicator"></span>
+      </label>`;
+
+      return `<div class="apos-manage-grid-piece" data-piece data-media-source-id="${
+        item.mediaSourceId}" ${alreadyImported ? 'data-imported' : ''}>
       <div class="apos-manage-grid-image">
         <img src="${item.thumbLink}" alt="image from Unsplash" />
         <div class="apos-image-screen" />
@@ -412,10 +468,7 @@ apos.define('media-sources-browser', {
         </div>
       </div>
       <div class="apos-manage-grid-piece-label">${item.title}</div>
-      <label>
-        <input type="checkbox" class="apos-field-input apos-field-input-checkbox" />
-        <span class="apos-field-input-checkbox-indicator"></span>
-      </label>
+      ${!alreadyImported ? checkbox : ''}
     </div>`;
     };
 

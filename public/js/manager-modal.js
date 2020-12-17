@@ -14,14 +14,11 @@ apos.define('apostrophe-images-manager-modal', {
     const superBeforeShow = self.beforeShow;
     self.beforeShow = (callback) => {
       self.$el.on('change', 'select[name="media-sources"]', function() {
-        const { value, selectedIndex } = this;
+        const { value } = this;
         if (value.toLowerCase() !== 'apostrophe') {
           apos.create('media-sources-browser', {
             action: self.action,
-            body: {
-              provider: value,
-              ...this[selectedIndex].dataset // pass data attributes from the option selected
-            }
+            body: { provider: value }
           });
           // Select "Apostrophe" in the dropdown: when coming back,
           // the user can select again what he has just selected
@@ -38,21 +35,7 @@ apos.define('apostrophe-images-manager-modal', {
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
       const $connectors = mediaSourceConnectors.reduce((acc, connector) => {
-        let dataAttr = '';
-        if (connector.script) {
-          const jsonReplacer = (key, val) => typeof val === 'function' ? val.toString() : val;
-          console.log('connector.script.params ====> ', connector.script.params);
-          // console.log('JSON.stringify(connector.script.params) ====> ', JSON.stringify(connector.script.params, jsonReplacer))
-          dataAttr = `
-            data-script-src="${connector.script.src}"
-            data-script-name="${connector.script.name}"
-            data-script-handler="${connector.script.handler}"
-            data-script-dom-element-name="${connector.script.domElementName}"
-            data-script-params="${encodeURIComponent(JSON.stringify(connector.script.params, jsonReplacer))}"
-          `;
-        }
-
-        return `${acc}<option ${dataAttr}>${connector.label}</option>`;
+        return `${acc}<option>${connector.label}</option>`;
       }, '');
 
       const selectClasses = 'class="apos-field-input apos-field-input-select"';
@@ -82,23 +65,6 @@ apos.define('media-sources-browser', {
     self.resizeContentHeight = () => {};
 
     self.beforeShow = async (callback) => {
-      if (options.body.scriptSrc && !window.WediaContentPicker) {
-        const jsScript = document.createElement('script');
-        jsScript.src = options.body.scriptSrc;
-        document.body.appendChild(jsScript);
-
-        jsScript.addEventListener('load', () => {
-          // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
-          const [ domElement ] = self.$el.find('[data-script-element]');
-
-          const { mediaSourceConnector } = self;
-          apos.emit('wediaPicker', {
-            domElement,
-            mediaSourceConnector
-          });
-        });
-      }
-
       self.$manageView = self.$el.find('[data-apos-manage-view]');
       self.$filters = self.$modalFilters.find('[data-filters]');
       self.$items = self.$el.find('[data-items]');
@@ -110,31 +76,52 @@ apos.define('media-sources-browser', {
       self.mediaSourceConnector = mediaSourceConnectors
         .find(connector => connector.label === self.provider);
 
-      self.enableCheckboxEvents();
-      self.enableInputsEvents();
-      self.disableOrEnableFilters();
-      await self.requestMediaSource();
+      if (self.mediaSourceConnector.script) {
+        if (!window[self.mediaSourceConnector.script.name]) {
+          const jsScript = document.createElement('script');
+          jsScript.src = self.mediaSourceConnector.script.src;
+          document.body.appendChild(jsScript);
+          jsScript.addEventListener('load', triggerScript);
+        } else {
+          triggerScript();
+        }
+      } else {
+        self.enableCheckboxEvents();
+        self.enableInputsEvents();
+        self.disableOrEnableFilters();
+        await self.requestMediaSource();
 
-      self.link('apos-import', async () => {
-        if (!self.choices.length) {
-          return;
-        };
+        self.link('apos-import', async () => {
+          if (!self.choices.length) {
+            return;
+          };
 
-        apos.ui.globalBusy(true);
-        const files = self.choices.map(choice => self.results
-          .find(result => result.mediaSourceId === choice));
-        const formData = {
-          files,
-          connector: self.mediaSourceConnector.name
-        };
+          apos.ui.globalBusy(true);
+          const files = self.choices.map(choice => self.results
+            .find(result => result.mediaSourceId === choice));
+          const formData = {
+            files,
+            connector: self.mediaSourceConnector.name
+          };
 
-        const imagesIds = await apos.utils
-          .post(`${self.mediaSourceConnector.action}/download`, formData);
+          const imagesIds = await apos.utils
+            .post(`${self.mediaSourceConnector.action}/download`, formData);
 
-        apos.emit('refreshImages', imagesIds);
-        apos.ui.globalBusy(false);
-        self.cancel();
-      });
+          apos.emit('refreshImages', imagesIds);
+          apos.ui.globalBusy(false);
+          self.cancel();
+        });
+      }
+
+      function triggerScript() {
+        // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
+        const [ domElement ] = self.$el.find('[data-script-element]');
+
+        apos.emit(`${self.mediaSourceConnector.script.name}Loaded`, {
+          domElement,
+          mediaSourceConnector: self.mediaSourceConnector
+        });
+      };
 
       callback();
     };

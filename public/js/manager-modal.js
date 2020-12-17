@@ -85,33 +85,35 @@ apos.define('media-sources-browser', {
         } else {
           triggerScript();
         }
-      } else {
-        self.enableCheckboxEvents();
-        self.enableInputsEvents();
-        self.disableOrEnableFilters();
-        await self.requestMediaSource();
 
-        self.link('apos-import', async () => {
-          if (!self.choices.length) {
-            return;
-          };
-
-          apos.ui.globalBusy(true);
-          const files = self.choices.map(choice => self.results
-            .find(result => result.mediaSourceId === choice));
-          const formData = {
-            files,
-            connector: self.mediaSourceConnector.name
-          };
-
-          const imagesIds = await apos.utils
-            .post(`${self.mediaSourceConnector.action}/download`, formData);
-
-          apos.emit('refreshImages', imagesIds);
-          apos.ui.globalBusy(false);
-          self.cancel();
-        });
+        return callback();
       }
+
+      self.enableCheckboxEvents();
+      self.enableInputsEvents();
+      self.disableOrEnableFilters();
+      await self.requestMediaSource();
+
+      self.link('apos-import', async () => {
+        if (!self.choices.length) {
+          return;
+        };
+
+        apos.ui.globalBusy(true);
+        const files = self.choices.map(choice => self.results
+          .find(result => result.mediaSourceId === choice));
+        const formData = {
+          files,
+          connector: self.mediaSourceConnector.name
+        };
+
+        const imagesIds = await apos.utils
+          .post(`${self.mediaSourceConnector.action}/download`, formData);
+
+        apos.emit('refreshImages', imagesIds);
+        apos.ui.globalBusy(false);
+        self.cancel();
+      });
 
       function triggerScript() {
         // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")

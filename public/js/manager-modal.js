@@ -81,16 +81,9 @@ apos.define('media-sources-browser', {
           const jsScript = document.createElement('script');
           jsScript.src = self.mediaSourceConnector.script.src;
           document.body.appendChild(jsScript);
-
-          jsScript.addEventListener('load', () => {
-            // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
-            const [ domElement ] = self.$el.find('[data-script-element]');
-
-            apos.emit(`${self.mediaSourceConnector.script.name}Loaded`, {
-              domElement,
-              mediaSourceConnector: self.mediaSourceConnector
-            });
-          });
+          jsScript.addEventListener('load', triggerScript);
+        } else {
+          triggerScript();
         }
       } else {
         self.enableCheckboxEvents();
@@ -119,6 +112,16 @@ apos.define('media-sources-browser', {
           self.cancel();
         });
       }
+
+      function triggerScript() {
+        // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
+        const [ domElement ] = self.$el.find('[data-script-element]');
+
+        apos.emit(`${self.mediaSourceConnector.script.name}Loaded`, {
+          domElement,
+          mediaSourceConnector: self.mediaSourceConnector
+        });
+      };
 
       callback();
     };

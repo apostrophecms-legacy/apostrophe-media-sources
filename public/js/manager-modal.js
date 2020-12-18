@@ -99,6 +99,7 @@ apos.define('media-sources-browser', {
           return;
         };
 
+        apos.notify('Download started.', { dismiss: true });
         apos.ui.globalBusy(true);
         const files = self.choices.map(choice => self.results
           .find(result => result.mediaSourceId === choice));
@@ -111,8 +112,11 @@ apos.define('media-sources-browser', {
           .post(`${self.mediaSourceConnector.action}/download`, formData);
 
         apos.emit('refreshImages', imagesIds);
+        apos.notify('Download succeeded.', {
+          type: 'success',
+          dismiss: true
+        });
         apos.ui.globalBusy(false);
-        self.cancel();
       });
 
       function triggerScript() {
@@ -326,7 +330,7 @@ apos.define('media-sources-browser', {
         self.updateFiltersChoices(filterChoices);
 
       } catch (err) {
-        // TODO Show error to user
+        apos.notify('There has been an error. Please, retry later.', { type: 'error' });
       }
     };
 
@@ -621,6 +625,7 @@ apos.define('media-sources-preview', {
         .find((connector) => connector.label === self.provider);
 
       self.link('apos-import', async () => {
+        apos.notify('Download started.', { dismiss: true });
         apos.ui.globalBusy(true);
 
         const formData = {
@@ -632,6 +637,10 @@ apos.define('media-sources-preview', {
           .post(`${self.mediaSourceConnector.action}/download`, formData);
 
         apos.emit('refreshImages', imagesIds);
+        apos.notify('Download succeeded.', {
+          type: 'success',
+          dismiss: true
+        });
         apos.ui.globalBusy(false);
         self.cancel();
       });

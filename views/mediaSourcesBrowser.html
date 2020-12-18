@@ -6,12 +6,15 @@
 
 {% block controls %}
   <div class="apos-modal-controls">
-    {{ buttons.minor('Finished', { action: 'cancel' }) }}
-    {{ buttons.base('Import', {
-        action: 'import',
-        attributes: 'data-apos-import'
-        }, 'apos-button--major apos-button--disabled')
-    }}
+    {{ buttons.minor('Back To Apostrophe', { action: 'cancel' }) }}
+
+    {% if not data.script %}
+      {{ buttons.base('Import', {
+          action: 'import',
+          attributes: 'data-apos-import'
+          }, 'apos-button--major apos-button--disabled')
+      }}
+    {% endif %}
   </div>
 {% endblock %}
 

@@ -29,6 +29,8 @@ Alternatively you may use an environment variable, to avoid storing keys in your
 
 ## Create your own connector
 
+### Example with an API
+
 What we call a connector is a module which connects the apostrophe image library to a specific provider.
 
 Each module must have a `mediaSourceConnector` option :
@@ -65,7 +67,8 @@ Here are all the standard filters handled by `apostrophe-media-sources`:
 * Orientation (Notice that your `choices` method should return some for this filter)
 
 A connector must have two methods declared in its `construct`,
-those will be called by `apostrophe-media-sources` :
+those will be called by `apostrophe-media-sources`:
+
 * `self.find` (req, filters):
   You get gere the filters selected by the user.
   This one must get the data from the provider and format it, it has to return
@@ -99,3 +102,24 @@ We take care of the attachment and image piece creation, as well as to delete te
 This method should return the available choices depending on the already selected filters.
 Can be static if there are no filters dependencies for a provider.
 This method is executed during every search.
+
+### Example with a script
+
+If a provider furnishes a script, the connector module must have:
+- a `public/js/user.js` file, starting the provider's script
+- a `index.js` file pushing the `user.js` file to assets, having empty methods for `find` and `choices` and a custom `download` method.
+
+Wedia module connector works this way. It can be used as a model for a future provider with a script.
+
+Here is a valid Wedia configuration:
+
+```js
+'apostrophe-media-sources-wedia': {
+  script: {
+    src: 'https://xxx.wedia-group.com/asset-picker/wedia-content-picker.js',
+    server: 'https://xxx.wedia-group.com',
+    name: 'WediaContentPicker',
+    maxConcurrentImports: 20 // optional - activates the multiple import - if absent, only single import will be available
+  }
+}
+```

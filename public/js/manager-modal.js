@@ -95,27 +95,32 @@ apos.define('media-sources-browser', {
       await self.requestMediaSource();
 
       self.link('apos-import', async () => {
-        if (!self.choices.length) {
-          return;
-        };
+        try {
+          if (!self.choices.length) {
+            return;
+          };
 
-        apos.notify('Download started.', { dismiss: true });
-        apos.ui.globalBusy(true);
-        const files = self.choices.map(choice => self.results
-          .find(result => result.mediaSourceId === choice));
-        const formData = {
-          files,
-          connector: self.mediaSourceConnector.name
-        };
+          apos.notify('Download started.', { dismiss: true });
+          apos.ui.globalBusy(true);
+          const files = self.choices.map(choice => self.results
+            .find(result => result.mediaSourceId === choice));
+          const formData = {
+            files,
+            connector: self.mediaSourceConnector.name
+          };
 
-        const imagesIds = await apos.utils
-          .post(`${self.mediaSourceConnector.action}/download`, formData);
+          const imagesIds = await apos.utils
+            .post(`${self.mediaSourceConnector.action}/download`, formData);
 
-        apos.emit('refreshImages', imagesIds);
-        apos.notify('Download succeeded.', {
-          type: 'success',
-          dismiss: true
-        });
+          apos.emit('refreshImages', imagesIds);
+          apos.notify('Download succeeded.', {
+            type: 'success',
+            dismiss: true
+          });
+        } catch (error) {
+          apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+        }
+
         apos.ui.globalBusy(false);
       });
 
@@ -625,22 +630,27 @@ apos.define('media-sources-preview', {
         .find((connector) => connector.label === self.provider);
 
       self.link('apos-import', async () => {
-        apos.notify('Download started.', { dismiss: true });
-        apos.ui.globalBusy(true);
+        try {
+          apos.notify('Download started.', { dismiss: true });
+          apos.ui.globalBusy(true);
 
-        const formData = {
-          files: [ self.item ],
-          connector: self.mediaSourceConnector.name
-        };
+          const formData = {
+            files: [ self.item ],
+            connector: self.mediaSourceConnector.name
+          };
 
-        const imagesIds = await apos.utils
-          .post(`${self.mediaSourceConnector.action}/download`, formData);
+          const imagesIds = await apos.utils
+            .post(`${self.mediaSourceConnector.action}/download`, formData);
 
-        apos.emit('refreshImages', imagesIds);
-        apos.notify('Download succeeded.', {
-          type: 'success',
-          dismiss: true
-        });
+          apos.emit('refreshImages', imagesIds);
+          apos.notify('Download succeeded.', {
+            type: 'success',
+            dismiss: true
+          });
+        } catch (error) {
+          apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+        }
+
         apos.ui.globalBusy(false);
         self.cancel();
       });

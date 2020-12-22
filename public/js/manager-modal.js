@@ -99,7 +99,7 @@ apos.define('apostrophe-images-manager-modal', {
 
     const superDisplayChoiceInCheckbox = self.displayChoiceInCheckbox;
     self.displayChoiceInCheckbox = function(id, state) {
-      var $checkbox = superDisplayChoiceInCheckbox(id, state);
+      const $checkbox = superDisplayChoiceInCheckbox(id, state);
       $checkbox.parent('label').toggleClass('apos-focus', state);
       $checkbox.closest('[data-piece]').toggleClass('apos-focus', state);
       return $checkbox;
@@ -266,49 +266,61 @@ apos.define('media-sources-browser', {
       });
     };
 
+    self.checkSelectAll = () => {
+      const [ selectAll ] = self.$filters.find('input[type="checkbox"][name="select-all"]');
+
+      $(selectAll).prop('checked', self.choices.length === self.results.length);
+    };
+
     self.enableCheckboxEvents = () => {
-      self.$el.on('change', 'input[type="checkbox"][name="select-all"]', function () {
-        const checked = $(this).prop('checked');
+      self.$el.on('change', 'input[type="checkbox"][name="select-all"]', ({ currentTarget }) => {
         const $pieces = self.$el.find('[data-piece]');
 
-        $pieces.each(function() {
-          const isImported = $(this).data('imported');
+        $pieces.each((i, piece) => {
+          const isImported = $(piece).data('imported');
 
           if (isImported === undefined) {
-            const id = $(this).attr('data-media-source-id');
+            const $checkbox = $(piece).find('input[type="checkbox"]');
 
-            $(this).find('input[type="checkbox"]').prop('checked', checked);
-            self.addOrRemoveChoice(id, !checked);
+            $checkbox.prop('checked', currentTarget.checked).trigger('change');
           }
         });
+
         self.toggleImportButton();
+        self.checkSelectAll();
       });
 
-      self.$el.on('change', '[data-piece] input[type="checkbox"]', function() {
-        const $box = $(this);
+      self.$el.on('change', '[data-piece] input[type="checkbox"]', ({ currentTarget }) => {
+        const $box = $(currentTarget);
+        const $currentPiece = $box.parent().parent();
         const id = $box.closest('[data-piece]').attr('data-media-source-id');
 
-        self.addOrRemoveChoice(id, !$box.prop('checked'));
-        self.toggleImportButton();
+        $currentPiece.toggleClass('apos-focus', currentTarget.checked);
+        self.addOrRemoveChoice(id, !currentTarget.checked);
       });
 
       // Add ability to select multiple checkboxes (Using Left Shift)
       let lastChecked;
       // Clicks on checkbox directly are not possible because as visibility:hidden is set on it and clicks won't be detected.
-      self.$el.on('click', '.apos-field-input-checkbox-indicator', function (e) {
-        const box = $(this).siblings('.apos-field-input-checkbox')[0];
+      self.$el.on('click', '[data-piece]', function (e) {
+        e.preventDefault();
+        const [ checkbox ] = $(e.currentTarget).find('input[type="checkbox"]');
+        const $checkbox = $(checkbox);
+
+        $checkbox.prop('checked', !checkbox.checked);
+        $checkbox.trigger('change');
 
         // Store a variable called lastchecked to point to the last checked checkbox. If it is undefined it's the first checkbox that's selected.
         if (!lastChecked) {
-          lastChecked = box;
+          lastChecked = checkbox;
           return;
         }
 
         // If shift key is pressed and the checkbox is not checked.
         if (e.shiftKey) {
-          if (!box.checked) {
-            const $checkboxesInScope = $(box).closest('[data-items]').find('input') || [];
-            const startIndex = $checkboxesInScope.index(box);
+          if (checkbox.checked) {
+            const $checkboxesInScope = $checkbox.closest('[data-items]').find('input') || [];
+            const startIndex = $checkboxesInScope.index(checkbox);
             const endIndex = $checkboxesInScope.index(lastChecked);
 
             $checkboxesInScope.slice(
@@ -322,19 +334,23 @@ apos.define('media-sources-browser', {
             });
           } else {
             const $pieces = self.$el.find('[data-piece]');
-            const currentId = $(box).attr('data-media-source-id');
-            $pieces.each(function() {
-              const id = $(this).attr('data-media-source-id');
+            const currentId = $(e.currentTarget).attr('data-media-source-id');
+
+            $pieces.each((i, piece) => {
+              const id = $(piece).attr('data-media-source-id');
 
               if (id !== currentId) {
-                $(this).find('input[type="checkbox"]').prop('checked', false);
-                self.addOrRemoveChoice(id, true);
+                $(piece).find('input[type="checkbox"]')
+                  .prop('checked', false)
+                  .trigger('change');
               }
             });
           }
         }
+
         self.toggleImportButton();
-        lastChecked = box;
+        self.checkSelectAll();
+        lastChecked = checkbox;
       });
     };
 
@@ -354,7 +370,9 @@ apos.define('media-sources-browser', {
         return;
       }
 
-      self.choices.push(id);
+      if (!self.choices.includes(id)) {
+        self.choices.push(id);
+      }
     };
 
     self.requestMediaSource = async (page = 1) => {
@@ -488,7 +506,8 @@ apos.define('media-sources-browser', {
       items.each((index, item) => {
         const button = $(item).find('.apos-manage-grid-piece-controls button');
 
-        $(button).on('click', () => {
+        $(button).on('click', (e) => {
+          e.stopPropagation();
           const itemId = $(item).data('media-source-id');
           const isImported = $(item).data('imported');
           const data = self.results.find((item) => item.mediaSourceId === itemId);

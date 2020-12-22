@@ -96,6 +96,14 @@ apos.define('apostrophe-images-manager-modal', {
         $el.toggleClass('apos-focus', $checkbox.prop('checked'));
       }
     };
+
+    const superDisplayChoiceInCheckbox = self.displayChoiceInCheckbox;
+    self.displayChoiceInCheckbox = function(id, state) {
+      var $checkbox = superDisplayChoiceInCheckbox(id, state);
+      $checkbox.parent('label').toggleClass('apos-focus', state);
+      $checkbox.closest('[data-piece]').toggleClass('apos-focus', state);
+      return $checkbox;
+    };
   }
 });
 

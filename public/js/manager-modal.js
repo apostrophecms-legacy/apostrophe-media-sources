@@ -11,6 +11,9 @@ apos.define('apostrophe-images-manager-modal', {
       self.refresh();
     });
 
+    // save manager so we can call edit() later
+    self.manager = apos.docs.getManager(options.name);
+
     const superBeforeShow = self.beforeShow;
     self.beforeShow = (callback) => {
       self.$el.on('change', 'select[name="media-sources"]', function() {
@@ -47,8 +50,51 @@ apos.define('apostrophe-images-manager-modal', {
         </select>`;
 
       $mediaSources.append($select);
-
       superAfterRefresh(callback);
+    };
+
+    const superEnableButtonEvents = self.enableButtonEvents;
+    self.enableButtonEvents = function() {
+      // focus on single click
+      self.$el.on('click', '[data-focus-' + options.name + ']', function(e) {
+        // If the click was actually on the edit button, we should
+        // focus and toggle the selection only if the image was not already
+        // part of the selection. Otherwise images disappear from the
+        // selection as they are edited which is very confusing. -Tom
+        if ($(e.target).attr('data-apos-edit-apostrophe-image')) {
+          const $checkbox = $(this).find('input[type="checkbox"]');
+          if ($checkbox.prop('checked')) {
+            return;
+          }
+        }
+        e.preventDefault();
+        self.focusElement($(this));
+      });
+
+      // edit on double click
+      self.$el.on('dblclick', '[data-edit-dbl-' + options.name + ']', function() {
+        const id = $(this).attr('data-edit-dbl-' + options.name);
+        self.manager.edit(id);
+      });
+
+      // toggle selection mode on checkmark select
+      superEnableButtonEvents();
+    };
+
+    self.focusElement = function($el) {
+      // set checkbox to :checked, and trigger change event
+      const $checkbox = $el.find('input[type="checkbox"]');
+
+      // only toggle if either the checkbox is already checked
+      // or the chooser is not full. Always release a checked box
+      if ($checkbox.prop('checked') || (!(self.chooser && self.chooser.full))) {
+        $el.toggleClass('apos-focus');
+        $checkbox.prop('checked', function(i, currentState) {
+          return !currentState;
+        });
+        $checkbox.trigger('change');
+        $el.toggleClass('apos-focus', $checkbox.prop('checked'));
+      }
     };
   }
 });
@@ -69,12 +115,25 @@ apos.define('media-sources-browser', {
       self.$filters = self.$modalFilters.find('[data-filters]');
       self.$items = self.$el.find('[data-items]');
       self.$searchInput = self.$el.find('.apos-modal-filters-search [data-media-sources-filter]')[0];
-      self.provider = self.$filters.attr('data-provider');
+      self.provider = self.$el.find('[data-provider]')[0].innerHTML;
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
 
       self.mediaSourceConnector = mediaSourceConnectors
-        .find((connector) => connector.label === self.provider);
+        .find(connector => connector.label === self.provider);
+
+      if (self.mediaSourceConnector.script) {
+        if (!window[self.mediaSourceConnector.script.name]) {
+          const jsScript = document.createElement('script');
+          jsScript.src = self.mediaSourceConnector.script.src;
+          document.body.appendChild(jsScript);
+          jsScript.addEventListener('load', triggerScript);
+        } else {
+          triggerScript();
+        }
+
+        return callback();
+      }
 
       self.enableCheckboxEvents();
       self.enableInputsEvents();
@@ -82,25 +141,44 @@ apos.define('media-sources-browser', {
       await self.requestMediaSource();
 
       self.link('apos-import', async () => {
-        if (!self.choices.length) {
-          return;
-        };
+        try {
+          if (!self.choices.length) {
+            return;
+          };
 
-        apos.ui.globalBusy(true);
-        const files = self.choices.map(choice => self.results
-          .find(result => result.mediaSourceId === choice));
-        const formData = {
-          files,
-          connector: self.mediaSourceConnector.name
-        };
+          apos.notify('Download started.', { dismiss: true });
+          apos.ui.globalBusy(true);
+          const files = self.choices.map(choice => self.results
+            .find(result => result.mediaSourceId === choice));
+          const formData = {
+            files,
+            connector: self.mediaSourceConnector.name
+          };
 
-        const imagesIds = await apos.utils
-          .post(`${self.mediaSourceConnector.action}/download`, formData);
+          const imagesIds = await apos.utils
+            .post(`${self.mediaSourceConnector.action}/download`, formData);
 
-        apos.emit('refreshImages', imagesIds);
+          apos.emit('refreshImages', imagesIds);
+          apos.notify('Download succeeded.', {
+            type: 'success',
+            dismiss: true
+          });
+        } catch (error) {
+          apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+        }
+
         apos.ui.globalBusy(false);
-        self.cancel();
       });
+
+      function triggerScript() {
+        // empty DOM element the script will populate (defined in template "mediaSourcesBrowser.html")
+        const [ domElement ] = self.$el.find('[data-script-element]');
+
+        apos.emit(`${self.mediaSourceConnector.script.name}Loaded`, {
+          domElement,
+          mediaSourceConnector: self.mediaSourceConnector
+        });
+      };
 
       callback();
     };
@@ -157,10 +235,9 @@ apos.define('media-sources-browser', {
     };
 
     self.disableOrEnableFilters = (disable = true, dependency) => {
-      const allFilters = [
-        ...self.mediaSourceConnector.standardFilters,
-        ...self.mediaSourceConnector.customFilters
-      ];
+      const allFilters = [];
+      self.mediaSourceConnector.standardFilters && allFilters.push(self.mediaSourceConnector.standardFilters);
+      self.mediaSourceConnector.customFilters && allFilters.push(self.mediaSourceConnector.customFilters);
 
       allFilters.forEach((filter) => {
         if (filter.dependsOn) {
@@ -304,7 +381,7 @@ apos.define('media-sources-browser', {
         self.updateFiltersChoices(filterChoices);
 
       } catch (err) {
-        // TODO Show error to user
+        apos.notify('There has been an error. Please, retry later.', { type: 'error' });
       }
     };
 
@@ -599,17 +676,27 @@ apos.define('media-sources-preview', {
         .find((connector) => connector.label === self.provider);
 
       self.link('apos-import', async () => {
-        apos.ui.globalBusy(true);
+        try {
+          apos.notify('Download started.', { dismiss: true });
+          apos.ui.globalBusy(true);
 
-        const formData = {
-          files: [ self.item ],
-          connector: self.mediaSourceConnector.name
-        };
+          const formData = {
+            files: [ self.item ],
+            connector: self.mediaSourceConnector.name
+          };
 
-        const imagesIds = await apos.utils
-          .post(`${self.mediaSourceConnector.action}/download`, formData);
+          const imagesIds = await apos.utils
+            .post(`${self.mediaSourceConnector.action}/download`, formData);
 
-        apos.emit('refreshImages', imagesIds);
+          apos.emit('refreshImages', imagesIds);
+          apos.notify('Download succeeded.', {
+            type: 'success',
+            dismiss: true
+          });
+        } catch (error) {
+          apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+        }
+
         apos.ui.globalBusy(false);
         self.cancel();
       });

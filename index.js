@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { IncomingMessage } = require('http');
 const unlink = require('util').promisify(fs.unlink);
 
 module.exports = {
@@ -6,7 +7,8 @@ module.exports = {
   moogBundle: {
     directory: 'lib/modules',
     modules: [
-      'apostrophe-media-sources-unsplash'
+      'apostrophe-media-sources-unsplash',
+      'apostrophe-media-sources-wedia'
     ]
   },
   construct: function(self, options) {
@@ -40,7 +42,7 @@ module.exports = {
 
       const choices = self.apos.modules[mediaSourceConnector.name].choices();
 
-      const standardFilters = mediaSourceConnector.standardFilters
+      const standardFilters = (mediaSourceConnector.standardFilters || [])
         .reduce((acc, filter) => {
           return {
             ...acc,
@@ -121,8 +123,12 @@ module.exports = {
         return res.status(200).send(data);
       } catch (err) {
         if (err.response) {
-          const { status, data } = err.response;
-          return res.status(status || 500).send(data);
+          const {
+            status, statusText, data
+          } = err.response;
+          const dataIsStream = data instanceof IncomingMessage;
+
+          return res.status(status || 500).send(dataIsStream ? statusText : data);
         }
 
         res.status(500).send(err);
@@ -142,14 +148,19 @@ module.exports = {
       const tempPath = self.apos.attachments.uploadfs.getTempPath();
 
       for (const file of files) {
-        const fileName = await connectorModule.download(req, file, tempPath);
+        // If a script is used, we need to format the file in the download method
+        // so we have to return it to insert image with the right file object
+        const { fileName, formattedFile } = await connectorModule
+          .download(req, file, tempPath);
+
+        const fileToInsert = formattedFile || file;
 
         const filePath = `${tempPath}/${fileName}`;
 
         const image = await self.insertImage({
           req,
           connectorName: connectorModule.options.name,
-          file,
+          file: fileToInsert,
           fileName,
           filePath
         });

@@ -243,13 +243,14 @@ apos.define('media-sources-browser', {
     };
 
     self.disableOrEnableFilters = (disable = true, dependency) => {
-      const allFilters = [];
-      self.mediaSourceConnector.standardFilters && allFilters.push(self.mediaSourceConnector.standardFilters);
-      self.mediaSourceConnector.customFilters && allFilters.push(self.mediaSourceConnector.customFilters);
+      const allFilters = [
+        ...self.mediaSourceConnector.standardFilters || [],
+        ...self.mediaSourceConnector.customFilters || []
+      ];
 
       allFilters.forEach((filter) => {
         if (filter.dependsOn) {
-          const $filter = self.$filters.find(`[name="${filter.name}"]`);
+          const $filter = self.$filters.find(`[name="${filter.name}"]`).first();
 
           if (!dependency) {
             $filter.prop('disabled', disable);
@@ -301,7 +302,8 @@ apos.define('media-sources-browser', {
 
       // Add ability to select multiple checkboxes (Using Left Shift)
       let lastChecked;
-      // Clicks on checkbox directly are not possible because as visibility:hidden is set on it and clicks won't be detected.
+      // Clicks on checkbox directly are not possible because as
+      // visibility:hidden is set on it and clicks won't be detected.
       self.$el.on('click', '[data-piece]', function (e) {
         e.preventDefault();
         const [ checkbox ] = $(e.currentTarget).find('input[type="checkbox"]');
@@ -310,7 +312,8 @@ apos.define('media-sources-browser', {
         $checkbox.prop('checked', !checkbox.checked);
         $checkbox.trigger('change');
 
-        // Store a variable called lastchecked to point to the last checked checkbox. If it is undefined it's the first checkbox that's selected.
+        // Store a variable called lastchecked to point to the last checked checkbox.
+        // If it is undefined it's the first checkbox that's selected.
         if (!lastChecked) {
           lastChecked = checkbox;
           return;

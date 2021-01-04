@@ -542,7 +542,7 @@ apos.define('media-sources-browser', {
         <div class="apos-image-screen" />
         <div class="apos-manage-grid-piece-controls">
           <button class="apos-button apos-button--minor">
-            Infos
+            Info
           <i class="fa fa-caret-right" />
           </button>
         </div>

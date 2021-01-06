@@ -29,6 +29,27 @@ module.exports = {
             ];
         }, []);
 
+      const mediaSourcesFiltersOptions = self.connectors.map(({ name, label }) => {
+        return {
+          value: name,
+          label
+        };
+      });
+
+      if (mediaSourcesFiltersOptions.length) {
+        self.filters.push({
+          name: 'mediaSource',
+          choices: [
+            {
+              value: 'apostrophe',
+              label: 'Apostrophe'
+            },
+            ...mediaSourcesFiltersOptions
+          ],
+          def: null
+        });
+      }
+
       self.on('apostrophe-pages:beforeSend', 'sendConnectorsToBrowser', (req) => {
         req.browserCall('apos.mediaSourceConnectors=?', JSON.stringify(self.connectors));
       });

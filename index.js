@@ -12,6 +12,8 @@ module.exports = {
     ]
   },
   construct: function(self, options) {
+    self.apos.define('apostrophe-images-cursor', require('./lib/improveCursor.js'));
+
     self.on('apostrophe:modulesReady', 'getAllImagesConnectorsModules', () => {
       // Find all images connectors defined in app configuration
       self.connectors = Object.values(self.apos.modules)

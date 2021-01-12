@@ -20,6 +20,7 @@ module.exports = async () => {
           const outputPath = filesPath.replace('src', 'public');
 
           return {
+            mode: 'production',
             target: 'es5',
             entry: `./${filesPath}/${filename}`,
             output: {

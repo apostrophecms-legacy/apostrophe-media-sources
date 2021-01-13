@@ -1,5 +1,7 @@
 # apostrophe-media-sources
 
+:warning: **When using this module, your site cannot be edited from IE11 browsers.**
+
 A set of modules that ease browse and import of web-compatible image content from various media sources, including DAMs and Unsplash, into Apostrophe's media library.
 
 ## How to install
@@ -26,31 +28,6 @@ To configure this modules, you should add this module and the connectors in the 
 Notice that the `Unsplash` Api require to create a free developer account which will provide you an access key.
 
 Alternatively you may use an environment variable, to avoid storing keys in your source code.
-
-## Bundling
-It's posible to write ES6 in your scripts but, for now, apostrophe assets only accepts ES5 javascript for minification,
-So we use webpack to transpile the needed files.
-
-To add files to transpile, simply add their folder's path in the `modulePaths` array of the webpack config:
-
-```javascript
-const modulePaths = [
-  'src/js',
-  'lib/modules/apostrophe-media-sources-wedia/src/js'
-];
-```
-
-Your code must be in an `src` folder which is at the same level of the public folder where you want to transpile.
-
-In dev mode, in order to watch and rebuild modified files, run the command:
-```
-npm run dev
-```
-
-Before to push code, don't forget to run the command
-```
-npm run build
-```
 
 ## Create your own connector
 

@@ -4,9 +4,7 @@
   "description": "A set of modules that ease importing of web-compatible image content from various media sources, including DAMs and Unsplash, into Apostrophe's media library",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --watch",
     "lint": "eslint .",
-    "build": "webpack",
     "test": "npm run lint"
   },
   "repository": {
@@ -24,15 +22,9 @@
   },
   "homepage": "https://github.com/apostrophecms/apostrophe-images-connector#readme",
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/plugin-transform-runtime": "^7.12.10",
-    "@babel/preset-env": "^7.12.11",
-    "babel-loader": "^8.2.2",
     "eslint": "^7.14.0",
     "eslint-config-apostrophe": "^3.4.1",
-    "husky": "^4.3.0",
-    "webpack": "^5.13.0",
-    "webpack-cli": "^4.3.1"
+    "husky": "^4.3.0"
   },
   "husky": {
     "hooks": {

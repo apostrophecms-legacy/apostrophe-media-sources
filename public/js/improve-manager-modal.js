@@ -1,5 +1,3 @@
-/* global apos $ */
-
 apos.define('apostrophe-images-manager-modal', {
   extend: 'apostrophe-pieces-manager-modal',
 

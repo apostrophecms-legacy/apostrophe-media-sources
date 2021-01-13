@@ -27,6 +27,25 @@ Notice that the `Unsplash` Api require to create a free developer account which 
 
 Alternatively you may use an environment variable, to avoid storing keys in your source code.
 
+## Bundling
+It's posible to write ES6 in your scripts but, for now, apostrophe assets only accepts ES5 javascript for minification,
+So we use webpack to transpile the needed files.
+
+To add files to transpile, simply add their folder's path in the `modulePaths` array of the webpack config:
+
+```javascript
+const modulePaths = [
+  'src/js',
+  'lib/modules/apostrophe-media-sources-wedia/src/js'
+];
+```
+
+Your code must be in an `src` folder which is at the same level of the public folder where you want to transpile.
+
+Before to push code, don't forget to run the command
+```
+npm run build
+```
 ## Create your own connector
 
 ### Example with an API

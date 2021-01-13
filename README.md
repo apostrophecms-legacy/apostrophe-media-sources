@@ -42,10 +42,16 @@ const modulePaths = [
 
 Your code must be in an `src` folder which is at the same level of the public folder where you want to transpile.
 
+In dev mode, in order to watch and rebuild modified files, run the command:
+```
+npm run dev
+```
+
 Before to push code, don't forget to run the command
 ```
 npm run build
 ```
+
 ## Create your own connector
 
 ### Example with an API

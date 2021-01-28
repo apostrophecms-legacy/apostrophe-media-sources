@@ -89,7 +89,7 @@ For these you do not have to provide a `label` or a `type`.
 
 For custom filters, you must provide `label` and `type`, which currently may only be `select`.
 
-A connector must have two methods declared in its `construct`. These will be called by `apostrophe-media-sources`:
+A connector must have at least three methods declared in its `construct`. These will be called by `apostrophe-media-sources`:
 
 * `async find (req, filters)`:
   Fetches data from the provider, taking into account the `filters` object. Returned images should be formatted as an array. Each entry should be formatted in the following manner:

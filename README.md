@@ -85,6 +85,10 @@ Here are all the standard filters handled by `apostrophe-media-sources`:
 * Search
 * Orientation (Notice that your `choices` method should return some for this filter)
 
+For these you do not have to provide a `label` or a `type`.
+
+For custom filters, you must provide `label` and `type`, which currently may only be `select`.
+
 A connector must have two methods declared in its `construct`. These will be called by `apostrophe-media-sources`:
 
 * `async find (req, filters)`:

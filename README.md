@@ -1,7 +1,5 @@
 # apostrophe-media-sources
 
-:warning: **When using this module, your site cannot be edited from IE11 browsers.**
-
 A set of modules that ease browse and import of web-compatible image content from various media sources, including DAMs and Unsplash, into Apostrophe's media library.
 
 ## How to install
@@ -12,6 +10,10 @@ This module will override `apostrophe-images`, adding the possibility to browse 
 For now, only `apostrophe-media-sources-unsplash` has been implemented, this module is part of the `apostrophe-media-sources` bundle, so you don't need to install it.
 
 This module will be available on `npm` soon, for now, you can still clone it to have a look.
+
+## Warnings
+
+**When using this module, your site cannot be edited from IE11 browsers.** Modern Microsoft Edge browsers work just fine. This site does not affect the experience of ordinary logged-out site visitors in IE11.
 
 ## Configuration
 

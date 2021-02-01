@@ -58,7 +58,6 @@ For the API approach, each connector module must have a `mediaSourceConnector` o
         {
           name: 'orientation',
           // For some providers, certain filters can be accessed only if another is set
-          // (syntax subject to change)
           dependsOn: [ 'search' ]
         },
         {

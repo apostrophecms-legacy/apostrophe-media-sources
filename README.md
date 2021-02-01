@@ -10,7 +10,7 @@ For now, `apostrophe-media-sources-unsplash``apostrophe-media-sources-wedia` hav
 
 ## Warnings
 
-**When using this module, your site cannot be edited in the IE11 browser.** Modern Microsoft Edge browsers work just fine. This site does not affect the experience of ordinary logged-out site visitors in IE11.
+**When using this module, your site cannot be edited in the IE11 browser.** This site does not affect the experience of ordinary logged-out site visitors in IE11.
 
 ## Configuration
 
@@ -24,9 +24,9 @@ To configure the modules in this bundle, you should add `apostrophe-media-source
       },
       'apostrophe-media-sources-wedia': {
         script: {
-          // You will get your own "xxx" when you sign up with Wedia
-          src: 'https://xxx.wedia-group.com/asset-picker/wedia-content-picker.js',
-          server: 'https://xxx.wedia-group.com',
+          // You will get your own subdomain ("xyz" below) when you sign up with Wedia
+          src: 'https://xyz.wedia-group.com/asset-picker/wedia-content-picker.js',
+          server: 'https://xyz.wedia-group.com',
           name: 'WediaContentPicker',
           maxConcurrentImports: 20 // optional - activates the multiple import -
           // if absent, only single import will be available
@@ -41,14 +41,14 @@ Note: to access the `Unsplash` API you will need to create a free developer acco
 If you prefer not to store keys in your source code, you can use an environment variable, like this:
 
 ```javascript
-        accessKey: process.env.UNSPLASH_ACCESS_KEY
+accessKey: process.env.UNSPLASH_ACCESS_KEY
 ```
 
 ## Create your own connector
 
 ### Example with an API
 
-What we call a connector is a module which connects the apostrophe image library to a specific provider. Most connectors will be based on an API offered by the provider, and use a universal user interface provided by this module, as with Unsplash. A few will use a custom "picker" UI script offered directly by the provider instead.
+What we call a connector is a module which connects the Apostrophe image library to a specific provider. Most connectors will be based on an API offered by the provider, and use a universal user interface provided by this module, as with Unsplash. A few will use a custom "picker" UI script offered directly by the provider instead.
 
 For the API approach, each connector module must have a `mediaSourceConnector` option:
 
@@ -91,32 +91,32 @@ For custom filters, you must provide `label` and `type`, which currently may onl
 
 A connector must have at least three methods declared in its `construct`. These will be called by `apostrophe-media-sources`:
 
-* `async find (req, filters)`:
+* `self.find = async (req, filters)`:
   Fetches data from the provider, taking into account the `filters` object. Returned images should be formatted as an array. Each entry should be formatted in the following manner:
 
-  ```javascript
-  {
-      mediaSourceId, // The image ID from the provider
-      title,
-      description,
-      width, // Number
-      height, // Number
-      thumbLink, // For listing
-      previewLink, // For preview button
-      likes, // Number
-      tags, // Array of strings
-      categories,
-      downloadLink, // Download Url
-      createdAt
-  }
-  ```
+```javascript
+{
+    mediaSourceId, // The image ID from the provider
+    title,
+    description,
+    width, // Number
+    height, // Number
+    thumbLink, // For listing
+    previewLink, // For preview button
+    likes, // Number
+    tags, // Array of strings
+    categories,
+    downloadLink, // Download Url
+    createdAt
+}
+```
 
-* `async download (req, file, tempPath)`:
+* `self.download = async (req, file, tempPath)`:
 Given a `file`, which must be one of the objects returned in the array by `find`, this method must download that file to the specified local filesystem folder, `tempPath`.
 The method must then return the image file name within that folder, with its extension.
 `apostrophe-media-source` will  take care of the attachment and image piece creation, as well as deleting the temporary image after the import operation is complete.
 
-* `async choices (req, filters)`
+* `self.choices = async (req, filters)`
 This method should return the available choices for all available filters, taking into account the previously chosen values in the `filters` object. If practical the set of choices provided for each filter should be reduced to take into account the choices already made for other filters, but not itself. This method is executed during every search. The return value must be an object with a property for each filter. The value of the property is an array of choices with `value` and `label` properties.
 
 ### Example with a DAM-provided "picker" script
@@ -165,7 +165,7 @@ apos.on('ThirdPartyPickerLoaded', ({ domElement, mediaSourceConnector }) => {
 
 Configuration of your module in `index.js` will then look like:
 
-```
+```js
   'third-party-connector': {
     script: {
       src: 'https://url-that-loads-the-picker-script-goes-here',

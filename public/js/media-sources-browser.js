@@ -213,12 +213,13 @@ apos.define('media-sources-browser', {
 
         // Store a variable called lastchecked to point to the last checked checkbox.
         // If it is undefined it's the first checkbox that's selected.
-        if (!lastChecked) {
+        if (!lastChecked && checkbox.checked) {
           lastChecked = checkbox;
-          return;
+          self.toggleImportButton();
+          return self.checkSelectAll();
         }
 
-        // If shift key is pressed and the checkbox is not checked.
+        // If shift key is pressed and the checkbox is not.
         if (e.shiftKey) {
           if (checkbox.checked) {
             const $checkboxesInScope = $checkbox.closest('[data-items]').find('input') || [];
@@ -252,7 +253,8 @@ apos.define('media-sources-browser', {
 
         self.toggleImportButton();
         self.checkSelectAll();
-        lastChecked = checkbox;
+
+        lastChecked = checkbox.checked ? checkbox : null;
       });
     };
 

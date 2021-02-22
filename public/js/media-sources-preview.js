@@ -20,7 +20,7 @@ apos.define('media-sources-preview', {
           apos.ui.globalBusy(true);
 
           const formData = {
-            files: [ self.item ],
+            file: self.item,
             connector: self.mediaSourceConnector.name
           };
 

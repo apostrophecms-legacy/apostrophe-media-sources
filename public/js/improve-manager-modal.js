@@ -25,7 +25,7 @@ apos.define('apostrophe-images-manager-modal', {
           });
           // Select "Apostrophe" in the dropdown: when coming back,
           // the user can select again what he has just selected
-          setTimeout(() => (this.selectedIndex = 0), 250);
+          setTimeout(() => (this.selectedIndex = 0), 400);
         }
       });
 
@@ -45,7 +45,7 @@ apos.define('apostrophe-images-manager-modal', {
 
       const $select =
         `<select name="media-sources" ${selectClasses}>
-          <option>Apostrophe</option>
+          <option>Media Library</option>
           ${$connectors}
         </select>`;
 

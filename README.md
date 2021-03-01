@@ -28,8 +28,7 @@ To configure the modules in this bundle, you should add `apostrophe-media-source
           src: 'https://xyz.wedia-group.com/asset-picker/wedia-content-picker.js',
           server: 'https://xyz.wedia-group.com',
           name: 'WediaContentPicker',
-          options: {} // optional - pass options to the wedia content picker -}
-          // if absent, only single import will be available
+          options: {} // optional - pass options to the wedia content picker -
         }
       }
     }
@@ -39,7 +38,7 @@ To configure the modules in this bundle, you should add `apostrophe-media-source
 Notes:
 * You can find existing wedia options in the documentation: https://crossmedia.atlassian.net/wiki/spaces/WD/pages/379551745/Wedia+Content+Picker#Settings
 
-* to access the `Unsplash` API you will need to create a free developer account, which will provide you with an access key, this free account is limited to 50 requests per hour. For Wedia you will need to work with the Wedia team.
+* To access the `Unsplash` API you will need to create a free developer account, which will provide you with an access key, this free account is limited to 50 requests per hour. For Wedia you will need to work with the Wedia team.
 
 If you prefer not to store keys in your source code, you can use an environment variable, like this:
 

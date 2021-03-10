@@ -70,8 +70,8 @@ apos.define('media-sources-browser', {
             type: 'success',
             dismiss: true
           });
-        } catch (error) {
-          apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+        } catch ({ response }) {
+          apos.notify(response || 'There has been an error. Please, retry later.', { type: 'error' });
         }
 
         apos.ui.globalBusy(false);
@@ -311,8 +311,10 @@ apos.define('media-sources-browser', {
 
         self.updateFiltersChoices(filterChoices);
 
-      } catch (err) {
-        apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+      } catch ({ response }) {
+        const msg = response || 'There has been an error. Please, retry later.';
+
+        apos.notify(msg, { type: 'error' });
       }
     };
 

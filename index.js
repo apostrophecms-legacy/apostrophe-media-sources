@@ -65,6 +65,5 @@ module.exports = {
   afterConstruct: (self) => {
     self.pushAssets();
     self.addRoutes();
-    // self.pushCreateSingleton();
   }
 };

@@ -70,8 +70,8 @@ apos.define('media-sources-browser', {
             type: 'success',
             dismiss: true
           });
-        } catch (error) {
-          apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+        } catch ({ response }) {
+          apos.notify(response || 'There has been an error. Please, retry later.', { type: 'error' });
         }
 
         apos.ui.globalBusy(false);
@@ -311,8 +311,10 @@ apos.define('media-sources-browser', {
 
         self.updateFiltersChoices(filterChoices);
 
-      } catch (err) {
-        apos.notify('There has been an error. Please, retry later.', { type: 'error' });
+      } catch ({ response }) {
+        const msg = response || 'There has been an error. Please, retry later.';
+
+        apos.notify(msg, { type: 'error' });
       }
     };
 
@@ -441,11 +443,11 @@ apos.define('media-sources-browser', {
         item.mediaSourceId}" ${alreadyImported ? 'data-imported' : ''}>
       <div class="apos-manage-grid-image">
         <img src="${item.thumbLink}" alt="image from Unsplash" />
-        <div class="apos-image-screen" />
+        <div class="apos-image-screen"></div>
         <div class="apos-manage-grid-piece-controls">
           <button class="apos-button apos-button--minor">
             Info
-          <i class="fa fa-caret-right" />
+            <i class="fa fa-caret-right"></i>
           </button>
         </div>
       </div>

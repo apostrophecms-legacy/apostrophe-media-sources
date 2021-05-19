@@ -7,6 +7,46 @@ module.exports = {
       'apostrophe-media-sources-wedia'
     ]
   },
+  beforeConstruct: (self, options) => {
+    options.addFields = [
+      ...options.addFields || [],
+      {
+        type: 'string',
+        name: 'creditUsername',
+        label: 'Credit Username'
+      },
+      {
+        type: 'string',
+        name: 'creditFirstName',
+        label: 'Credit First Name'
+      },
+      {
+        type: 'string',
+        name: 'creditLastName',
+        label: 'Credit Last Name'
+      },
+      {
+        type: 'string',
+        name: 'creditPicture',
+        label: 'Credit Picture'
+      }
+    ];
+
+    options.arrangeFields = [
+      {
+        name: 'credit',
+        label: 'Credit',
+        fields: [
+          'credit',
+          'creditUsername',
+          'creditFirstName',
+          'creditLastName',
+          'creditPicture',
+          'creditUrl'
+        ]
+      }
+    ];
+  },
   construct: (self, options) => {
     require('./lib/api.js')(self, options);
 

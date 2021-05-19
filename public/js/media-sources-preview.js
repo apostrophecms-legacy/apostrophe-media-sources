@@ -6,13 +6,21 @@ apos.define('media-sources-preview', {
     const superBeforeShow = self.beforeShow;
     self.beforeShow = async (callback) => {
       self.$form = self.$el.find('[data-apos-form]');
-      self.provider = self.$form.attr('data-provider');
-      self.item = JSON.parse(self.$form.attr('data-item'));
+
+      self.enableImportLink();
+      self.enableGroupTabs();
+
+      superBeforeShow(callback(null));
+    };
+
+    self.enableImportLink = () => {
+      const provider = self.$form.attr('data-provider');
+      const file = JSON.parse(self.$form.attr('data-item'));
 
       const mediaSourceConnectors = JSON.parse(apos.mediaSourceConnectors);
 
       self.mediaSourceConnector = mediaSourceConnectors
-        .find((connector) => connector.label === self.provider);
+        .find((connector) => connector.label === provider);
 
       self.link('apos-import', async () => {
         try {
@@ -20,7 +28,7 @@ apos.define('media-sources-preview', {
           apos.ui.globalBusy(true);
 
           const formData = {
-            file: self.item,
+            file,
             connector: self.mediaSourceConnector.name
           };
 
@@ -39,8 +47,16 @@ apos.define('media-sources-preview', {
         apos.ui.globalBusy(false);
         self.cancel();
       });
+    };
 
-      superBeforeShow(callback());
+    self.enableGroupTabs = () => {
+      self.$form.on('click', '[data-apos-open-group]', ({ target }) => {
+        const $tab = $(target);
+
+        self.$form.find('[data-apos-open-group], [data-apos-group]').removeClass('apos-active');
+        $tab.addClass('apos-active');
+        self.$form.find(`[data-apos-group=${$tab.data('apos-open-group')}]`).addClass('apos-active');
+      });
     };
   }
 });

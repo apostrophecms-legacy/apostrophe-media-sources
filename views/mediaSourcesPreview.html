@@ -39,34 +39,48 @@
     data-item="{{ item | dump }}"
     >
   	<div class="apostrophe-image-editor-fields">
+
+      <div class="apos-schema apos-schema--with-tabs" data-apos-form>
+        <div class="apos-schema-tabs" data-schema-tabs>
+          <div class="apos-schema-tab apos-active" data-apos-open-group="info">
+            {{ __ns('apostrophe', 'Info') }}
+          </div>
+
+          <div class="apos-schema-tab" data-apos-open-group="credit">
+            {{ __ns('apostrophe', 'Credit') }}
+          </div>
+
+        </div>
+      </div>
+
       <div class="apos-schema-groups">
-        <div class="apos-schema-group apos-active" data-apos-group="basics">
+        <div class="apos-schema-group apos-active" data-apos-group="info">
           <div class="apos-schema-group-inner">
 
-          <fieldset class="apos-field apos-field-attachment">
-            <label class="apos-field-label">
-              {{ __ns('apostrophe', 'Image File') }}
-            </label>
-          <div class="apos-attachment-existing">
-            <div class="apos-attachment-preview">
-              <img src="{{ item.thumbLink }}" alt="{{ item.title }}">
+            <fieldset class="apos-field apos-field-attachment">
+              <label class="apos-field-label">
+                {{ __ns('apostrophe', 'Image File') }}
+              </label>
+            <div class="apos-attachment-existing">
+              <div class="apos-attachment-preview">
+                <img src="{{ item.thumbLink }}" alt="{{ item.title }}">
+              </div>
+              <span class="apos-attachment-info">
+                {{ item.title or __ns('apostrophe', 'No Title') }}
+              </span>
+              <span class="apos-attachment-info">
+                {{ item.width }} X {{ item.height }}
+              </span>
+              <div class="apos-button-group">
+                <a
+                  class="apos-button apos-button--action"
+                  href="{{ item.previewLink }}"
+                  target="_blank">
+                  {{ __ns('apostrophe', 'View File') }}
+                </a>
+              </div>
             </div>
-            <span class="apos-attachment-info">
-              {{ item.title or __ns('apostrophe', 'No Title') }}
-            </span>
-            <span class="apos-attachment-info">
-              {{ item.width }} X {{ item.height }}
-            </span>
-            <div class="apos-button-group">
-              <a
-                class="apos-button apos-button--action"
-                href="{{ item.previewLink }}"
-                target="_blank">
-                {{ __ns('apostrophe', 'View File') }}
-              </a>
-            </div>
-          </div>
-          </fieldset>
+            </fieldset>
 
             <fieldset class="apos-field" data-name="title">
               <label class="apos-field-label">
@@ -115,17 +129,81 @@
                 type="text"
                 value="{{ item.tags | join(", ") }}">
             </fieldset>
+          </div>
+        </div>
 
-            <fieldset class="apos-field" data-name="categories">
+        <div class="apos-schema-group" data-apos-group="credit">
+          <div class="apos-schema-group-inner">
+            <fieldset class="apos-field" data-name="credit">
               <label class="apos-field-label">
-                {{ propertyLabels.categories or __ns('apostrophe', 'Categories') }}
+                {{ propertyLabels.credit or __ns('apostrophe', 'Credit') }}
               </label>
               <input
-                name="categories"
+                name="credit"
                 disabled
                 class="apos-field-input apos-field-input-text"
                 type="text"
-                value="{{ item.categories | join(", ") }}">
+                value="{{ item.creditInfos.credit }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="creditUsername">
+              <label class="apos-field-label">
+                {{ propertyLabels.creditUsername or __ns('apostrophe', 'Credit Username') }}
+              </label>
+              <input
+                name="creditUsername"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.creditInfos.creditUsername }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="creditFirstName">
+              <label class="apos-field-label">
+                {{ propertyLabels.creditFirstName or __ns('apostrophe', 'Credit First Name') }}
+              </label>
+              <input
+                name="creditFirstName"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.creditInfos.creditFirstName }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="creditLastName">
+              <label class="apos-field-label">
+                {{ propertyLabels.creditLastName or __ns('apostrophe', 'Credit Last Name') }}
+              </label>
+              <input
+                name="creditLastName"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.creditInfos.creditLastName }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="creditPicture">
+              <label class="apos-field-label">
+                {{ propertyLabels.creditPicture or __ns('apostrophe', 'Credit Picture') }}
+              </label>
+              <input
+                name="creditPicture"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.creditInfos.creditPicture }}">
+            </fieldset>
+
+            <fieldset class="apos-field" data-name="creditUrl">
+              <label class="apos-field-label">
+                {{ propertyLabels.creditUrl or __ns('apostrophe', 'Credit URL') }}
+              </label>
+              <input
+                name="creditUrl"
+                disabled
+                class="apos-field-input apos-field-input-text"
+                type="text"
+                value="{{ item.creditInfos.creditUrl }}">
             </fieldset>
           </div>
         </div>

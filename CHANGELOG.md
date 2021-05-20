@@ -1,7 +1,7 @@
 # Changelog
 
-## 1.1.0 (2021-03-10)
-* Stores Unsplash credit informations in pieces.
+## 1.1.0 (2021-05-20)
+* Stores Unsplash credit information in pieces.
 * Modifies Unsplash find and download methods to send and show rate limit exceeded errors.
 
 ## 1.0.1 (2021-03-09)

@@ -1,3 +1,7 @@
+# ⛔️ **DEPRECATED** — do not use for new projects
+
+See [our current docs](https://docs.apostrophecms.org/)
+
 # apostrophe-media-sources
 
 A set of modules that ease the browsing and import of web-compatible image content from various media sources, including the Wedia DAM and Unsplash, into Apostrophe's media library.
